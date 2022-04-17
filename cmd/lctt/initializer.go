@@ -46,40 +46,51 @@ func init() {
 				Flags: []cli.Flag{
 					&cli.TimestampFlag{
 						Name:        "since",
+						Aliases:     []string{"s"},
 						Layout:      layout,
 						Usage:       "Specifies the `<DATE>` after which articles are published.",
 						DefaultText: time.Now().Format(layout),
 					},
-					&cli.StringFlag{
-						Name:        "prefer",
-						Usage:       "Specifies a single `<CATEGORY>` you prefer.",
-						DefaultText: "ALL",
+					//&cli.StringFlag{
+					//	Name:        "prefer",
+					//	Aliases:     []string{"p"},
+					//	Usage:       "Specifies a single `<CATEGORY>` you prefer.",
+					//	DefaultText: "ALL",
+					//},
+					&cli.BoolFlag{
+						Name:    "verbose",
+						Aliases: []string{"v"},
+						Usage:   "Prints full details of articles.",
 					},
 					&cli.BoolFlag{
-						Name:  "verbose",
-						Usage: "Prints full details of articles.",
-					},
-					&cli.BoolFlag{
-						Name:  "open",
-						Usage: "Opens articles in your browser (specified in `configs/settings.yaml`).",
+						Name:    "open",
+						Aliases: []string{"o"},
+						Usage:   "Opens articles in your browser (specified in `configs/settings.yaml`).",
 					},
 				},
 				Action: feed,
 			},
 			{
-				Name:      "collect",
-				Usage:     "Collects an article with its <CATEGORY> and <LINK>",
-				UsageText: "lctt collect [<options>] <CATEGORY> <LINK>",
+				Name:                   "collect",
+				UseShortOptionHandling: true,
+				Usage:                  "Collects an article with its <CATEGORY> and <LINK>",
 				Description: "The `collect` command needs you to specify the <CATEGORY> and <LINK> of an article,\n" +
 					"where <CATEGORY> can be `news`, `talk` and `tech` and <LINK> belongs to a website defined in `configs/websites.yml`.",
 				Flags: []cli.Flag{
-					&cli.BoolFlag{
-						Name:  "no-preview",
-						Usage: "Disables auto-preview the article in your editor (specified in `configs/settings.yaml`).",
+					&cli.StringFlag{
+						Name:    "category",
+						Aliases: []string{"c"},
+						Usage:   "Specifies the `<CATEGORY>` of the article.",
 					},
 					&cli.BoolFlag{
-						Name:  "no-upload",
-						Usage: "Disables auto-upload the article.",
+						Name:    "preview",
+						Aliases: []string{"p"},
+						Usage:   "Disables auto-preview the article in your editor (specified in `configs/settings.yaml`).",
+					},
+					&cli.BoolFlag{
+						Name:    "upload",
+						Aliases: []string{"u"},
+						Usage:   "Disables auto-upload the article.",
 					},
 				},
 				Action: collect,

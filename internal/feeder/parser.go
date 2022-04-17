@@ -23,7 +23,10 @@ func ParseAll() []Item {
 
 func parse(link string) []Item {
 	feed, err := rss.Fetch(link)
-	helper.ExitIfError(err)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
 	var items []Item
 	for _, item := range feed.Items {
 		title := item.Title

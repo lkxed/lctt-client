@@ -32,10 +32,10 @@ func feed(c *cli.Context) error {
 		date = *datePtr
 	}
 	items = feeder.FilterPubDate(items, date)
-	category := c.String("prefer")
-	if len(category) > 0 {
-		items = feeder.FilterCategories(items, category)
-	}
+	//category := c.String("prefer")
+	//if len(category) > 0 {
+	//	items = feeder.FilterCategories(items, category)
+	//}
 	if len(items) == 0 {
 		log.Fatalf("No article has been published since %s.\n", date.Format(layout))
 	}
@@ -61,25 +61,14 @@ func feed(c *cli.Context) error {
 }
 
 func collect(c *cli.Context) error {
-	if c.NArg() != 2 {
+	if c.NArg() != 1 {
 		log.Fatalln(c.Command.Usage)
 	}
-	category := c.Args().Get(0)
-	categories := []string{"news", "talk", "tech"}
-	var contains bool
-	for _, v := range categories {
-		if category == v {
-			contains = true
-		}
-	}
-	if !contains {
-		log.Fatalln()
-	}
-	link := c.Args().Get(1)
+	link := c.Args().Get(0)
 	article := collector.Parse(link)
 	filename, _ := collector.Generate(article)
 	previewPath := path.Join(helper.PreviewDir, filename)
-	if !c.Bool("no-preview") {
+	if c.Bool("preview") {
 		editor := configurar.Settings.Editor
 		if len(configurar.Settings.Editor) == 0 {
 			log.Fatalln("No editor specified in `settings.yml`")
@@ -91,7 +80,12 @@ func collect(c *cli.Context) error {
 		log.Println("Modifications have been saved.")
 		helper.ExitIfError(cmd.Run())
 	}
-	if !c.Bool("no-upload") {
+	if c.Bool("upload") {
+		category := c.String("category")
+		categories := []string{"news", "talk", "tech"}
+		if !helper.StringSliceContains(categories, category) {
+			log.Fatalln("To upload, you must specify the <CATEGORY>.")
+		}
 		fmt.Print("Are you ready to upload the article? (yes/no) (default: yes): ")
 		var confirmation string
 		_, _ = fmt.Scanln(&confirmation)
