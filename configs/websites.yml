@@ -82,8 +82,8 @@ www.linux.com:
 www.linuxtechi.com:
   title: .entry-title
   summary:
-  author: .byline > .author > a
-  date: .entry-date > time
+  author: .author-name > a
+  date: .posted-on > .updated
   content: .entry-content
   exclusion:
   feed: feed
