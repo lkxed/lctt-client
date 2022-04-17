@@ -1,0 +1,116 @@
+opensource.com:
+  title: .page-title > span
+  summary: .article__subhead
+  author: .author__list > .profile > a
+  date: .author__meta-date
+  content: .block-field-blocknodearticlefield-lead-image, .block-field-blocknodearticlebody
+  exclusion:
+  feed: feed
+
+itsfoss.com:
+  title: .entry-title
+  summary: .entry-content > p:first-child
+  author: .entry-author-link
+  date: .entry-modified-time
+  content: .entry-content
+  exclusion: .ss-inline-share-wrapper *
+  feed: feed
+
+news.itsfoss.com:
+  title: .entry-title
+  summary: .newspack-post-subtitle
+  author: .entry-subhead > .entry-meta > .byline > .author > a
+  date: .posted-on > .entry-date
+  content: .post-thumbnail, .entry-content
+  exclusion: .jp-relatedposts-i2 *
+  feed: feed
+
+www.debugpoint.com:
+  title: .entry-title
+  summary: strong
+  author: .auth-name > a
+  date: time[itemprop="datePublished"]
+  content: .s-post-content
+  exclusion:
+  feed: feed
+
+fedoramagazine.org:
+  title: .post-title
+  summary:
+  author: .post-meta-author > a
+  date: .post-meta-date > a
+  content: .post-image, .post-inner > .post-content
+  exclusion: .sharedaddy *
+  feed: feed
+
+jvns.ca:
+  title: .entry-title
+  summary:
+  author: hgroup > h1 > a
+  date: .meta > time
+  content: .entry-content
+  exclusion:
+  feed:
+
+kerneltalks.com:
+  title: .entry-title
+  summary: .has-text-align-center > em
+  author: kerneltalks, https://www.facebook.com/kerneltalks/
+  date: .entry-modified-time
+  content: .entry-content
+  exclusion:
+  feed: feed
+
+www.opensourceforu.com:
+  title: .entry-title
+  summary: .td-post-content > p > em
+  author: .td-post-author-name > a
+  date: .td-post-date > .entry-date
+  content: .td-post-content
+  exclusion:
+  feed: feed
+
+www.linux.com:
+  title: .entry-title
+  summary:
+  author: .td-post-author-name > a
+  date: .td-post-date > .entry-date
+  content: .td-post-content
+  exclusion:
+  feed: feed
+
+www.linuxtechi.com:
+  title: .entry-title
+  summary:
+  author: .byline > .author > a
+  date: .entry-date > time
+  content: .entry-content
+  exclusion:
+  feed: feed
+
+ostechnix.com:
+  title: .entry-title
+  summary: .penci-psub-title
+  author: .byline > .author > a
+  date: .entry-date
+  content: div#ftwp-postcontent
+  exclusion:
+  feed: feed
+
+www.linuxuprising.com:
+  title: .entry-title
+  summary:
+  author: .post-author a.g-profile
+  date: .timestamp-link > .updated
+  content: .entry-content
+  exclusion:
+  feed: feeds/posts/default
+
+# to be confirmed
+#www.freecodecamp.org:
+#  title: .post-full-title
+#  summary:
+#  author: .author-card-name > a
+#  date: .post-full-meta-date
+#  content: .post-content
+#  exclusion:
