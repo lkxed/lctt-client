@@ -29,3 +29,6 @@ go.work
 
 # previews
 previews/
+
+# binary files
+bin/
