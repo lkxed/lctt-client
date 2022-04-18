@@ -190,7 +190,7 @@ bin/lctt collect -puc tech https://opensource.com/article/xxx/
 
 #### 提交译文
 
-请查阅 `bin/lctt request --help/-h`
+请查阅 `bin/lctt complete --help/-h`
 
 （待补充）
 
