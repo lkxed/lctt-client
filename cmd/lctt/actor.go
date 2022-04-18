@@ -17,7 +17,7 @@ import (
 
 func initialize(_ *cli.Context) error {
 	gitter.Initialize()
-	log.Println("Mission completed. Adios!")
+	log.Println("Mission Complete. Adios!")
 	return nil
 }
 
@@ -56,7 +56,7 @@ func feed(c *cli.Context) error {
 		helper.ExitIfError(cmd.Run())
 	}
 	log.Println("Have you made up your mind? If so, choose an article to `collect`.")
-	log.Println("Anyway, mission completed. Adios!")
+	log.Println("Anyway, Mission Complete. Adios!")
 	return nil
 }
 
@@ -104,6 +104,39 @@ func collect(c *cli.Context) error {
 			}
 		}
 	}
-	log.Println("Mission completed. Adios!")
+	log.Println("Mission Complete. Adios!")
+	return nil
+}
+
+func request(c *cli.Context) error {
+	if c.NArg() != 1 {
+		log.Fatalln(c.Command.Usage)
+	}
+	filename := c.Args().Get(0)
+	category := c.String("category")
+	categories := []string{"news", "talk", "tech"}
+	if !helper.StringSliceContains(categories, category) {
+		log.Fatalln("To upload, you must specify the <CATEGORY>.")
+	}
+	gitter.Request(category, filename)
+	return nil
+}
+
+func complete(c *cli.Context) error {
+	if c.NArg() != 1 {
+		log.Fatalln(c.Command.Usage)
+	}
+	filename := c.Args().Get(0)
+	category := c.String("category")
+	categories := []string{"news", "talk", "tech"}
+	if !helper.StringSliceContains(categories, category) {
+		log.Fatalln("To upload, you must specify the <CATEGORY>.")
+	}
+	force := c.Bool("force")
+	err := gitter.Complete(category, filename, force)
+	if err != nil {
+		log.Fatalln("Your translation is not complete. Please complete it and try again.")
+	}
+	log.Println("Mission Complete. Adios!")
 	return nil
 }

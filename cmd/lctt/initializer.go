@@ -85,17 +85,47 @@ func init() {
 					&cli.BoolFlag{
 						Name:    "preview",
 						Aliases: []string{"p"},
-						Usage:   "Disables auto-preview the article in your editor (specified in `configs/settings.yaml`).",
+						Usage:   "Auto-preview the article in your editor (specified in `configs/settings.yaml`).",
 					},
 					&cli.BoolFlag{
 						Name:    "upload",
 						Aliases: []string{"u"},
-						Usage:   "Disables auto-upload the article.",
+						Usage:   "Auto-upload the article.",
 					},
 				},
 				Action: collect,
 			},
+			{
+				Name:  "request",
+				Usage: "Requests to translate an article with its <CATEGORY> and <FILENAME>",
+				Description: "The `request` command needs you to specify the <CATEGORY> and <FILENAME> of an article,\n" +
+					"where <CATEGORY> can be `news`, `talk` and `tech`.",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:     "category",
+						Aliases:  []string{"c"},
+						Required: true,
+						Usage:    "Specifies the `<CATEGORY>` of the article.",
+					},
+				},
+				Action: request,
+			},
+			{
+				Name:                   "complete",
+				UseShortOptionHandling: true,
+				Usage:                  "Completes the translating process of an article with its <CATEGORY> and <FILENAME>",
+				Description: "The `complete` command checks translation, and uploads your translation if the checks passed. \n" +
+					"You need to specify the <CATEGORY> and <FILENAME> of an article,\n" +
+					"where <CATEGORY> can be `news`, `talk` and `tech`.",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:    "category",
+						Aliases: []string{"c"},
+						Usage:   "Specifies the `<CATEGORY>` of the article.",
+					},
+				},
+				Action: complete,
+			},
 		},
 	}
-
 }

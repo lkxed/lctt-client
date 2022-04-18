@@ -7,13 +7,13 @@ import (
 
 func TestOpen(t *testing.T) {
 	open()
-	log.Println(repository, worktree)
+	inspectOpened()
 }
 
 func TestCheckout(t *testing.T) {
 	open()
 	checkout("master")
-	log.Println(repository, worktree)
+	log.Println(inspectStatus())
 }
 
 func TestDeleteLocalBranch(t *testing.T) {
