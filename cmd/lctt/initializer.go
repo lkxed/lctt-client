@@ -30,19 +30,20 @@ func init() {
 		},
 		Commands: []*cli.Command{
 			{
-				Name:  "init",
-				Usage: "Initializes the client.",
-				Description: "The `init` command does the following things:\n" +
-					"1. Forks the upstream if not forked.\n" +
-					"2. Clones the origin if not cloned.\n" +
-					"3. Pulls the origin if local exists.\n",
+				Name:      "init",
+				Usage:     "Initializes the client.",
+				UsageText: "lctt init",
+				Description: `The "init" command does the following things:
+"1. Forks the upstream if not forked.
+"2. Clones the origin if not cloned.
+"3. Pulls the origin if local exists.`,
 				Action: initialize,
 			},
 			{
 				Name:  "feed",
 				Usage: "Feeds you a list of articles published recently.",
-				Description: "The `feed` command provides you with articles recently published on all subscribed websites.\n" +
-					"You can subscribe a website by adding it to `configs/websites.yml`.",
+				Description: `The "feed" command provides you with articles recently published on all subscribed websites.
+You can subscribe a website by adding it to "configs/websites.yml".`,
 				Flags: []cli.Flag{
 					&cli.TimestampFlag{
 						Name:        "since",
@@ -65,7 +66,7 @@ func init() {
 					&cli.BoolFlag{
 						Name:    "open",
 						Aliases: []string{"o"},
-						Usage:   "Opens articles in your browser (specified in `configs/settings.yaml`).",
+						Usage:   `Opens articles in your browser (specified in "configs/settings.yaml").`,
 					},
 				},
 				Action: feed,
@@ -74,8 +75,8 @@ func init() {
 				Name:                   "collect",
 				UseShortOptionHandling: true,
 				Usage:                  "Collects an article with its <CATEGORY> and <LINK>",
-				Description: "The `collect` command needs you to specify the <CATEGORY> and <LINK> of an article,\n" +
-					"where <CATEGORY> can be `news`, `talk` and `tech` and <LINK> belongs to a website defined in `configs/websites.yml`.",
+				Description: `The "collect" command needs you to specify the <CATEGORY> and <LINK> of an article
+where <CATEGORY> can be "news", "talk" and "tech" and <LINK> belongs to a website defined in "configs/websites.yml".`,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:    "category",
@@ -85,7 +86,7 @@ func init() {
 					&cli.BoolFlag{
 						Name:    "preview",
 						Aliases: []string{"p"},
-						Usage:   "Auto-preview the article in your editor (specified in `configs/settings.yaml`).",
+						Usage:   `Auto-preview the article in your editor (specified in "configs/settings.yaml").`,
 					},
 					&cli.BoolFlag{
 						Name:    "upload",
@@ -98,8 +99,8 @@ func init() {
 			{
 				Name:  "request",
 				Usage: "Requests to translate an article with its <CATEGORY> and <FILENAME>",
-				Description: "The `request` command needs you to specify the <CATEGORY> and <FILENAME> of an article,\n" +
-					"where <CATEGORY> can be `news`, `talk` and `tech`.",
+				Description: `The "request" command needs you to specify the <CATEGORY> and <FILENAME> of an article,
+where <CATEGORY> can be "news", "talk" and "tech".`,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:     "category",
@@ -114,9 +115,9 @@ func init() {
 				Name:                   "complete",
 				UseShortOptionHandling: true,
 				Usage:                  "Completes the translating process of an article with its <CATEGORY> and <FILENAME>",
-				Description: "The `complete` command checks translation, and uploads your translation if the checks passed. \n" +
-					"You need to specify the <CATEGORY> and <FILENAME> of an article,\n" +
-					"where <CATEGORY> can be `news`, `talk` and `tech`.",
+				Description: `The "complete" command checks translation, and uploads your translation if the checks passed
+You need to specify the <CATEGORY> and <FILENAME> of an article,
+where <CATEGORY> can be "news", "talk" and "tech".`,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:    "category",
