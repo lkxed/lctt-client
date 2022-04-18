@@ -96,13 +96,10 @@ func clone() {
 
 func add(relativePath string) {
 	inspectOpened()
-	log.Println("Adding changes...")
 
 	// git add $filepath
 	_, err := worktree.Add(relativePath)
 	helper.ExitIfError(err)
-
-	log.Println("Added.")
 }
 
 func commit(message string) {

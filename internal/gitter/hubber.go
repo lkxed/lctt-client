@@ -24,6 +24,25 @@ func fork() *github.Repository {
 	return repository
 }
 
+func checkOpenPR(title string) bool {
+	openPRs := listOpenPR()
+	for _, pr := range openPRs {
+		if title == *pr.Title {
+			return true
+		}
+	}
+	return false
+}
+
+func listOpenPR() []*github.PullRequest {
+	owner := UpstreamOwner
+	repo := path.Base(UpstreamRepository)
+	// Because default "State" filter is "open"
+	list, _, err := client.PullRequests.List(context.Background(), owner, repo, nil)
+	helper.ExitIfError(err)
+	return list
+}
+
 func createPR(branch string, title string, body string) *github.PullRequest {
 	log.Println("Creating pull request...")
 

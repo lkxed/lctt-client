@@ -41,12 +41,8 @@ func Collect(category string, filename string) {
 	relativePath := path.Join("sources", category, filename)
 	filepath := path.Join(LocalRepository, relativePath)
 	helper.Move(previewPath, filepath)
-	log.Println("Checking worktree status...")
-	if isClean, changes := inspectStatus(); isClean {
-		log.Fatalln("No changes since last commit.")
-	} else {
-		log.Println(changes)
-	}
+
+	checkWorkTreeStatus()
 
 	add(relativePath)
 
@@ -85,6 +81,8 @@ func Request(category string, filename string) {
 	}
 	helper.Write(filepath, []byte(content))
 
+	checkWorkTreeStatus()
+
 	add(relativePath)
 
 	message := formatCommitMessage("申领原文", category, filename)
@@ -94,7 +92,10 @@ func Request(category string, filename string) {
 
 	title := formatRequestTitle("申领原文", category, filename)
 	body := formatRequestBody("being translated")
-	createPR(branch, title, body)
+	exists := checkOpenPR(title)
+	if !exists {
+		createPR(branch, title, body)
+	}
 	//checkout(UpstreamBranch)
 }
 
@@ -104,14 +105,15 @@ func Complete(category string, filename string, force bool) error {
 	branch := initBranch(filename)
 	checkout(branch)
 
-	relativePath := path.Join("sources", category, filename)
-	filepath := path.Join(LocalRepository, relativePath)
-	content := string(helper.ReadFile(filepath))
+	sourcesRelativePath := path.Join("sources", category, filename)
+	sourcesPath := path.Join(LocalRepository, sourcesRelativePath)
+	content := string(helper.ReadFile(sourcesPath))
 	// Decide whether the translation is complete by
 	// checking if Chinese characters consist more than 50% of it.
 	rest := strings.Split(content, "======")[1]
 	translation := strings.Split(rest,
 		"--------------------------------------------------------------------------------")[0]
+	translation = helper.ClearSpace(translation)
 	var count int
 	for _, c := range translation {
 		if unicode.Is(unicode.Han, c) {
@@ -120,11 +122,24 @@ func Complete(category string, filename string, force bool) error {
 	}
 	zhHansPercentage := float64(count) / float64(len(translation))
 	log.Printf("Chinese characters consist %.1f%% of your translation.\n", zhHansPercentage*100)
-	if !force && zhHansPercentage < 0.5 {
+	if !force && zhHansPercentage < 0.1 {
 		return errors.New("translation not completed")
 	}
 
-	add(relativePath)
+	// In case somebody forgets to change it
+	if strings.Contains(content, "译者ID") {
+		content = strings.Replace(content, "译者ID", Username, 2)
+		helper.Write(sourcesPath, []byte(content))
+	}
+
+	translatedRelativePath := path.Join("translated", category, filename)
+	translatedPath := path.Join(LocalRepository, translatedRelativePath)
+	helper.Move(sourcesPath, translatedPath)
+
+	checkWorkTreeStatus()
+
+	add(sourcesRelativePath)
+	add(translatedRelativePath)
 
 	message := formatCommitMessage("提交译文", category, filename)
 	commit(message)
@@ -133,7 +148,11 @@ func Complete(category string, filename string, force bool) error {
 
 	title := formatRequestTitle("提交译文", category, filename)
 	body := formatRequestBody("translated")
-	createPR(branch, title, body)
+	exists := checkOpenPR(title)
+	if !exists {
+		createPR(branch, title, body)
+	}
+
 	checkout(UpstreamBranch)
 	return nil
 }
@@ -145,4 +164,13 @@ func initBranch(filename string) string {
 		createLocalBranch(branch)
 	}
 	return branch
+}
+
+func checkWorkTreeStatus() {
+	log.Println("Checking worktree status...")
+	if isClean, changes := inspectStatus(); isClean {
+		log.Fatalln("No changes since last commit.")
+	} else {
+		fmt.Println(changes)
+	}
 }

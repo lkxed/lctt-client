@@ -52,22 +52,11 @@ func inspectStatus() (bool, string) {
 	var s string
 	if !status.IsClean() {
 		s = status.String()
-		first := s[0]
-		switch first {
-		case '?':
-			s = strings.Replace(s, "?  ", "[?] `", 1)
-			s = strings.Replace(s, "\n", "`", 1)
-		case 'A':
-			s = strings.Replace(s, "A  ", "[+] `", 1)
-			s = strings.Replace(s, "\n", "`", 1)
-		case 'D':
-			s = strings.Replace(s, "D  ", "[-] `", 1)
-			s = strings.Replace(s, "\n", "`", 1)
-		case 'M':
-			s = strings.Replace(s, "M  ", "[M] `", 1)
-			s = strings.Replace(s, "\n", "`", 1)
-		}
-		s = strings.Replace(s, "\n", "", 1)
+		s = strings.ReplaceAll(s, "?  ", "[?] ")
+		s = strings.ReplaceAll(s, "A  ", "[+] ")
+		s = strings.ReplaceAll(s, "D  ", "[-] ")
+		s = strings.ReplaceAll(s, "M  ", "[M] ")
 	}
+	s = helper.TrimSpace(s)
 	return status.IsClean(), s
 }

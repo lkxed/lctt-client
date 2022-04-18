@@ -26,7 +26,12 @@
 * [urfave/cli][6]：一个 CLI 库，用于实现命令行客户端。
 * [SlyMarbo/rss][7]：用于解析 RSS 订阅。
 
-（进度：实现了手动选题 & 申领原文 & 提交译文，满足了我自己的基本需求。）
+进度：
+
+* 手动选题 - 已完成
+* 申领原文 - 已完成
+* 提交译文 - 已完成
+* 清理分支 - 开发中
 
 ### 到哪里去
 
@@ -130,6 +135,7 @@ OPTIONS:
 具体来说，有以下几个使用场景：
 
 显示网站今天刚发布的文章列表：
+
 ```shell
 bin/lctt feed
 ```
@@ -207,12 +213,21 @@ bin/lctt collect -puc tech https://opensource.com/article/xxx/
 最后，感谢 LCTT 组长 @[wxy][10] 对我和这个项目的大力支持。
 
 [1]: https://github.com/LCTT/lctt-scripts
+
 [2]: https://github.com/lkxed
+
 [3]: https://github.com/PuerkitoBio/goquery
+
 [4]: https://github.com/go-git/go-git
+
 [5]: https://github.com/google/go-github
+
 [6]: https://github.com/urfave/cli
+
 [7]: https://github.com/SlyMarbo/rss
+
 [8]: https://docs.github.com/cn/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-token
+
 [9]: https://github.com/lujun9972
+
 [10]: https://github.com/wxy
