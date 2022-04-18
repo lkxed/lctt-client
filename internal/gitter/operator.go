@@ -29,7 +29,8 @@ func checkout(branch string) {
 
 	err := worktree.Checkout(&git.CheckoutOptions{
 		Branch: plumbing.NewBranchReferenceName(branch),
-		Keep:   true,
+		// since git is transparent to users, this is allowed
+		Force: true,
 	})
 	helper.ExitIfError(err)
 
