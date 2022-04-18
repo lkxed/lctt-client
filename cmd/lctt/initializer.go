@@ -34,9 +34,9 @@ func init() {
 				Usage:     "Initializes the client.",
 				UsageText: "lctt init",
 				Description: `The "init" command does the following things:
-"1. Forks the upstream if not forked.
-"2. Clones the origin if not cloned.
-"3. Pulls the origin if local exists.`,
+1. Forks the upstream if not forked.
+2. Clones the origin if not cloned.
+3. Pulls the origin if local exists.`,
 				Action: initialize,
 			},
 			{
@@ -75,7 +75,7 @@ You can subscribe a website by adding it to "configs/websites.yml".`,
 				Name:                   "collect",
 				UseShortOptionHandling: true,
 				Usage:                  "Collects an article with its <CATEGORY> and <LINK>",
-				Description: `The "collect" command needs you to specify the <CATEGORY> and <LINK> of an article
+				Description: `The "collect" command needs you to specify the <CATEGORY> and <LINK> of an article,
 where <CATEGORY> can be "news", "talk" and "tech" and <LINK> belongs to a website defined in "configs/websites.yml".`,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
@@ -115,7 +115,7 @@ where <CATEGORY> can be "news", "talk" and "tech".`,
 				Name:                   "complete",
 				UseShortOptionHandling: true,
 				Usage:                  "Completes the translating process of an article with its <CATEGORY> and <FILENAME>",
-				Description: `The "complete" command checks translation, and uploads your translation if the checks passed
+				Description: `The "complete" command checks translation, and uploads your translation if the checks passed.
 You need to specify the <CATEGORY> and <FILENAME> of an article,
 where <CATEGORY> can be "news", "talk" and "tech".`,
 				Flags: []cli.Flag{
@@ -123,6 +123,11 @@ where <CATEGORY> can be "news", "talk" and "tech".`,
 						Name:    "category",
 						Aliases: []string{"c"},
 						Usage:   "Specifies the `<CATEGORY>` of the article.",
+					},
+					&cli.StringFlag{
+						Name:    "force",
+						Aliases: []string{"f"},
+						Usage:   "Ignores the checks, upload anyway.",
 					},
 				},
 				Action: complete,
