@@ -198,9 +198,9 @@ bin/lctt collect -puc tech https://opensource.com/article/xxx/
 
 首先，感谢本项目中使用到的所有 Go 项目的贡献者，是他们让这个项目成为可能。
 
-其次，感谢 @lunjun9972，他维护的 lctt-scripts 给了我很大的启发。
+其次，感谢 @[lujun9972][9]，他维护的 lctt-scripts 给了我很大的启发。
 
-最后，感谢 LCTT 组长 @wxy 对我和这个项目的大力支持。
+最后，感谢 LCTT 组长 @[wxy][10] 对我和这个项目的大力支持。
 
 [1]: https://github.com/LCTT/lctt-scripts
 [2]: https://github.com/lkxed
@@ -210,3 +210,5 @@ bin/lctt collect -puc tech https://opensource.com/article/xxx/
 [6]: https://github.com/urfave/cli
 [7]: https://github.com/SlyMarbo/rss
 [8]: https://docs.github.com/cn/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-token
+[9]: https://github.com/lujun9972
+[10]: https://github.com/wxy
