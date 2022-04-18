@@ -87,6 +87,10 @@ editor: "code -n -w"
 browser: "open -a safari"
 ```
 
+原文模板：`configs/article.tmpl`。
+
+如果你要使用选题功能，请把原文模板中的 `lkxed` 全部替换为你的 GitHub ID（共 3 处）。
+
 ### 基本使用
 
 目前客户端支持以下命令：
