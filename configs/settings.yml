@@ -28,7 +28,7 @@ git:
     access-token: ghp_kUa1diAnFoLLoWGr1atLkXEd0NG1tHu68Ha0D
     pull-request:
       # Defaults:
-      # - <ACTION>: `自动选题`/`申领原文`/`提交译文`
+      # - <ACTION>: `手动选题`/`申领原文`/`提交译文`
       # - <CATEGORY>: `news`/`talk`/`tech`
       title: "[<ACTION>][<CATEGORY>]: <FILENAME>"
       # The `body` is essentially the first comment of the PR.
