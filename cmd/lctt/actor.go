@@ -131,7 +131,21 @@ func request(c *cli.Context) error {
 	if !helper.StringSliceContains(categories, category) {
 		log.Fatalln("To upload, you must specify the <CATEGORY>.")
 	}
+
 	gitter.Request(category, filename)
+
+	if c.Bool("open") {
+		editor := configurar.Settings.Editor
+		if len(configurar.Settings.Editor) == 0 {
+			log.Fatalln("No editor specified in `settings.yml`")
+		}
+		editCmd := strings.Split(editor, " ")
+		tmpPath := path.Join(helper.TmpDir, filename)
+		editCmd = append(editCmd, tmpPath)
+		log.Printf("Opening article in %s...\n", editCmd[0])
+		cmd := exec.Command(editCmd[0], editCmd[1:]...)
+		helper.ExitIfError(cmd.Run())
+	}
 
 	log.Println("Mission Complete. Adios!")
 	return nil

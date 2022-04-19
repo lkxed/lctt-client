@@ -100,8 +100,9 @@ where <CATEGORY> can be "news", "talk" and "tech" and <LINK> belongs to a websit
 				Action: collect,
 			},
 			{
-				Name:  "request",
-				Usage: "Requests to translate an article with its <CATEGORY> and <FILENAME>",
+				Name:                   "request",
+				UseShortOptionHandling: true,
+				Usage:                  "Requests to translate an article with its <CATEGORY> and <FILENAME>",
 				Description: `The "request" command needs you to specify the <CATEGORY> and <FILENAME> of an article,
 where <CATEGORY> can be "news", "talk" and "tech".`,
 				Flags: []cli.Flag{
@@ -110,6 +111,11 @@ where <CATEGORY> can be "news", "talk" and "tech".`,
 						Aliases:  []string{"c"},
 						Required: true,
 						Usage:    "Specifies the `<CATEGORY>` of the article.",
+					},
+					&cli.BoolFlag{
+						Name:    "open",
+						Aliases: []string{"o"},
+						Usage:   "Specifies the `<CATEGORY>` of the article.",
 					},
 				},
 				Action: request,
