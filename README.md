@@ -176,7 +176,7 @@ bin/lctt feed -vos 2006-01-02
 bin/lctt collect -c tech https://opensource.com/article/xxx/
 ```
 
-这将生成符合 LCTT 规范的原文 Markdown 文件，存放在 `previews` 目录中。
+这将生成符合 LCTT 规范的原文 Markdown 文件，存放在 `tmp` 目录中。
 
 如果你想要同时在编辑器中预览这篇文章，你需要指定 `--preview/-p` 选项。
 
@@ -188,7 +188,7 @@ bin/lctt collect -c tech https://opensource.com/article/xxx/
 bin/lctt collect -puc tech https://opensource.com/article/xxx/
 ```
 
-这将生成符合 LCTT 规范的原文 Markdown 文件，存放在 `previews` 目录中，同时在你的编辑器中打开它。
+这将生成符合 LCTT 规范的原文 Markdown 文件，存放在 `tmp` 目录中，同时在你的编辑器中打开它。
 
 当你确认格式无误后，返回客户端，并根据提示按下回车，上传原文，完成选题。
 

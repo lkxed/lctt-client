@@ -16,12 +16,18 @@ import (
 )
 
 func initialize(_ *cli.Context) error {
+	log.Println("Initializing...")
+
 	gitter.Initialize()
+
+	log.Println("Initialized.")
 	log.Println("Mission Complete. Adios!")
 	return nil
 }
 
 func feed(c *cli.Context) error {
+	log.Println("Feeding...")
+
 	items := feeder.ParseAll()
 	datePtr := c.Timestamp("since")
 	var date time.Time
@@ -55,6 +61,7 @@ func feed(c *cli.Context) error {
 		log.Println("Opening articles in browser")
 		helper.ExitIfError(cmd.Run())
 	}
+
 	log.Println("Have you made up your mind? If so, choose an article to `collect`.")
 	log.Println("Anyway, Mission Complete. Adios!")
 	return nil
@@ -64,24 +71,27 @@ func collect(c *cli.Context) error {
 	if c.NArg() != 1 {
 		log.Fatalln(c.Command.Usage)
 	}
+	log.Println("Collecting...")
+
 	link := c.Args().Get(0)
 	article := collector.Parse(link)
 	filename, _ := collector.Generate(article)
-	previewPath := path.Join(helper.PreviewDir, filename)
+	tmpPath := path.Join(helper.TmpDir, filename)
 	if c.Bool("preview") {
 		editor := configurar.Settings.Editor
 		if len(configurar.Settings.Editor) == 0 {
 			log.Fatalln("No editor specified in `settings.yml`")
 		}
 		editCmd := strings.Split(editor, " ")
-		editCmd = append(editCmd, previewPath)
+		editCmd = append(editCmd, tmpPath)
 		log.Printf("Previewing article in %s...\n", editCmd[0])
 		cmd := exec.Command(editCmd[0], editCmd[1:]...)
 		log.Println("Modifications have been saved.")
 		helper.ExitIfError(cmd.Run())
 	}
+	var category string
 	if c.Bool("upload") {
-		category := c.String("category")
+		category = c.String("category")
 		categories := []string{"news", "talk", "tech"}
 		if !helper.StringSliceContains(categories, category) {
 			log.Fatalln("To upload, you must specify the <CATEGORY>.")
@@ -104,6 +114,8 @@ func collect(c *cli.Context) error {
 			}
 		}
 	}
+
+	log.Printf("Collected: %s/%s.\n", category, filename)
 	log.Println("Mission Complete. Adios!")
 	return nil
 }
@@ -112,6 +124,8 @@ func request(c *cli.Context) error {
 	if c.NArg() != 1 {
 		log.Fatalln(c.Command.Usage)
 	}
+	log.Println("Requesting...")
+
 	filename := c.Args().Get(0)
 	category := c.String("category")
 	categories := []string{"news", "talk", "tech"}
@@ -119,6 +133,9 @@ func request(c *cli.Context) error {
 		log.Fatalln("To upload, you must specify the <CATEGORY>.")
 	}
 	gitter.Request(category, filename)
+
+	log.Printf("Requested: %s/%s.\n", category, filename)
+	log.Println("Mission Complete. Adios!")
 	return nil
 }
 
@@ -126,6 +143,8 @@ func complete(c *cli.Context) error {
 	if c.NArg() != 1 {
 		log.Fatalln(c.Command.Usage)
 	}
+	log.Println("Completing...")
+
 	filename := c.Args().Get(0)
 	category := c.String("category")
 	categories := []string{"news", "talk", "tech"}
@@ -137,6 +156,22 @@ func complete(c *cli.Context) error {
 	if err != nil {
 		log.Fatalln("Your translation is not complete. Please complete it and try again.")
 	}
+
+	log.Printf("Completed: %s/%s.\n", category, filename)
+	log.Println("Mission Complete. Adios!")
+	return nil
+}
+
+func clean(_ *cli.Context) error {
+	log.Println("Cleaning...")
+
+	err := gitter.Clean()
+	if err != nil {
+		log.Println("Such a tidy workspace! Nothing to clean.")
+	} else {
+		log.Println("Cleaned.")
+	}
+
 	log.Println("Mission Complete. Adios!")
 	return nil
 }

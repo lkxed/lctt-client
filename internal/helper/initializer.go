@@ -7,9 +7,9 @@ import (
 )
 
 var (
-	ClientDir  string
-	ConfigDir  string
-	PreviewDir string
+	ClientDir string
+	ConfigDir string
+	TmpDir    string
 )
 
 func init() {
@@ -20,5 +20,5 @@ func init() {
 	ClientDir = wd
 
 	ConfigDir = path.Join(ClientDir, "configs")
-	PreviewDir = path.Join(ClientDir, "previews")
+	TmpDir = path.Join(ClientDir, "tmp")
 }

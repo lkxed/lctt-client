@@ -18,6 +18,9 @@ func init() {
 		Usage:     "Aims to be THE All-In-One client for LCTT (https://linux.cn/lctt/)",
 		UsageText: "lctt <command> [<options>] [<arguments>]",
 		Version:   "0.0.1",
+		Description: `To get helps with supported commands, type "lctt <command> --help/-h".
+Configuration files are in "configs" folder, and temporary files are stored in "tmp" folder.
+Note: you should never `,
 		Authors: []*cli.Author{
 			{
 				Name:  "lkxed",
@@ -112,9 +115,8 @@ where <CATEGORY> can be "news", "talk" and "tech".`,
 				Action: request,
 			},
 			{
-				Name:                   "complete",
-				UseShortOptionHandling: true,
-				Usage:                  "Completes the translating process of an article with its <CATEGORY> and <FILENAME>",
+				Name:  "complete",
+				Usage: "Completes the translating process of an article with its <CATEGORY> and <FILENAME>",
 				Description: `The "complete" command checks translation, and uploads your translation if the checks passed.
 You need to specify the <CATEGORY> and <FILENAME> of an article,
 where <CATEGORY> can be "news", "talk" and "tech".`,
@@ -131,6 +133,16 @@ where <CATEGORY> can be "news", "talk" and "tech".`,
 					},
 				},
 				Action: complete,
+			},
+			{
+				Name:      "clean",
+				Usage:     "Cleans the client.",
+				UsageText: "lctt clean",
+				Description: `The "clean" command does the following things (if their relating PRs are merged):
+1. Deletes local branches.
+2. Deletes origin branches.
+3. Deletes temporary files.`,
+				Action: clean,
 			},
 		},
 	}

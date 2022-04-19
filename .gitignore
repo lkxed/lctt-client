@@ -27,11 +27,11 @@ go.work
 .idea/
 *.iml
 
-# previews
-previews/
+# Temporary
+tmp/
 
-# binary files
+# Binary files
 bin/
 
-# personal configuations
+# Personal configuations
 configs/settings.yml

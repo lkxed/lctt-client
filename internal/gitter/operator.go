@@ -50,7 +50,7 @@ func createLocalBranch(branch string) {
 
 func deleteLocalBranch(branch string) {
 	inspectOpened()
-	checkout("master")
+
 	log.Println("Deleting local branch...")
 
 	ref := plumbing.NewBranchReferenceName(branch)

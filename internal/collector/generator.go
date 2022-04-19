@@ -25,10 +25,10 @@ func Generate(article Article) (string, []byte) {
 	helper.ExitIfError(t.Execute(&buffer, article))
 
 	filename := helper.ConcatFilename(article.Date, article.Title)
-	previewPath := path.Join(helper.PreviewDir, filename)
-	helper.Write(previewPath, buffer.Bytes())
+	tmpPath := path.Join(helper.TmpDir, filename)
+	helper.Write(tmpPath, buffer.Bytes())
 
-	log.Printf("Generated: %s\n", previewPath)
+	log.Printf("Generated: %s\n", tmpPath)
 
 	return filename, buffer.Bytes()
 }

@@ -16,6 +16,18 @@ func MkdirAll(dir string) {
 	ExitIfError(err)
 }
 
+func ListDir(dir string) ([]string, error) {
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+	var filenames []string
+	for _, file := range files {
+		filenames = append(filenames, file.Name())
+	}
+	return filenames, nil
+}
+
 func Write(filepath string, content []byte) {
 	MkdirAll(path.Dir(filepath))
 	err := ioutil.WriteFile(filepath, content, 0644)
