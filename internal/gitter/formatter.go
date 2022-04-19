@@ -1,12 +1,15 @@
 package gitter
 
-import "strings"
+import (
+	"lctt-client/internal/helper"
+	"strings"
+)
 
 // ReformatBranch according to https://mirrors.edge.kernel.org/pub/software/scm/git/docs/git-check-ref-format.html
 func reformatBranch(branch string) string {
-	branch = strings.TrimRight(branch, ".md")
+	branch = helper.TrimRight(branch, ".md")
 	// 1. They cannot end with the sequence .lock
-	branch = strings.TrimRight(branch, ".lock")
+	branch = helper.TrimRight(branch, ".lock")
 	// 3. They cannot have two consecutive dots .. anywhere.
 	branch = strings.ReplaceAll(branch, "..", "-")
 	// 4. They cannot have ASCII control characters, space, tilde ~, caret ^, or colon : anywhere
@@ -19,10 +22,10 @@ func reformatBranch(branch string) string {
 	branch = strings.ReplaceAll(branch, "*", "-")
 	branch = strings.ReplaceAll(branch, "[", "-")
 	// 6. They cannot begin or end with a slash / or contain multiple consecutive slashes
-	branch = strings.TrimRight(branch, "/")
+	branch = helper.TrimRight(branch, "/")
 	branch = strings.ReplaceAll(branch, "//", "-")
 	// 7. They cannot end with a dot .
-	branch = strings.TrimRight(branch, ".")
+	branch = helper.TrimRight(branch, ".")
 	// 8. They cannot contain a sequence @{
 	branch = strings.ReplaceAll(branch, "@{", "-")
 	// 10. They cannot contain a \

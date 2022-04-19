@@ -183,6 +183,7 @@ func Complete(category string, filename string, force bool) error {
 		createPR(branch, title, body)
 	}
 
+	log.Printf("Completed: %s.\n", translatedRelativePath)
 	checkout(UpstreamBranch)
 	return nil
 }
@@ -222,10 +223,9 @@ func initBranch(filename string) string {
 }
 
 func cleanBranch(filename string) {
-	branch := strings.ReplaceAll(LocalBranch, "<FILENAME>", filename)
-	branch = reformatBranch(branch)
-	deleteLocalBranch(branch)
-	deleteOriginBranch(branch)
+	branch := reformatBranch(filename)
+	_ = deleteLocalBranch(branch)
+	_ = deleteOriginBranch(branch)
 }
 
 func checkWorkTreeStatus() {

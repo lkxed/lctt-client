@@ -14,12 +14,28 @@ func ClearSpace(s string) string {
 func TrimSpace(s string) string {
 	s = strings.TrimSpace(s)
 	for strings.HasPrefix(s, "\n") || strings.HasPrefix(s, "\t") {
-		s = strings.TrimLeft(s, "\n")
-		s = strings.TrimLeft(s, "\t")
+		s = TrimLeft(s, "\n")
+		s = TrimLeft(s, "\t")
 	}
 	for strings.HasSuffix(s, "\n") || strings.HasSuffix(s, "\t") {
-		s = strings.TrimRight(s, "\n")
-		s = strings.TrimRight(s, "\t")
+		s = TrimRight(s, "\n")
+		s = TrimRight(s, "\t")
+	}
+	return s
+}
+
+func TrimRight(s string, cut string) string {
+	lastIndex := strings.LastIndex(s, cut)
+	if len(s)-lastIndex == len(cut) {
+		return s[:lastIndex]
+	}
+	return s
+}
+
+func TrimLeft(s string, cut string) string {
+	index := strings.Index(s, cut)
+	if index == 0 {
+		return s[len(cut):]
 	}
 	return s
 }

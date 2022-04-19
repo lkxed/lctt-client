@@ -48,30 +48,40 @@ func createLocalBranch(branch string) {
 	log.Printf("Created: %s\n", branch)
 }
 
-func deleteLocalBranch(branch string) {
+func deleteLocalBranch(branch string) error {
 	inspectOpened()
 
 	log.Println("Deleting local branch...")
 
 	ref := plumbing.NewBranchReferenceName(branch)
-	helper.ExitIfError(repository.Storer.RemoveReference(ref))
+	err := repository.Storer.RemoveReference(ref)
 
+	if err != nil {
+		return err
+	}
 	log.Printf("Deleted: %s\n", branch)
+	return nil
 }
 
-func deleteOriginBranch(branch string) {
+func deleteOriginBranch(branch string) error {
 	inspectOpened()
 	log.Println("Deleting origin branch...")
 
 	remote, err := repository.Remote("origin")
-	helper.ExitIfError(err)
-	helper.ExitIfError(remote.Push(&git.PushOptions{
+	if err != nil {
+		return err
+	}
+	err = remote.Push(&git.PushOptions{
 		Auth:     auth,
 		RefSpecs: []config.RefSpec{config.RefSpec(":refs/heads/" + branch)},
 		Progress: os.Stdout,
-	}))
+	})
+	if err != nil {
+		return err
+	}
 
 	log.Printf("Deleted: %s\n", branch)
+	return nil
 }
 
 func clone() {

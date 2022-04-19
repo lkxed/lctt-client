@@ -115,7 +115,6 @@ func collect(c *cli.Context) error {
 		}
 	}
 
-	log.Printf("Collected: %s/%s.\n", category, filename)
 	log.Println("Mission Complete. Adios!")
 	return nil
 }
@@ -134,7 +133,6 @@ func request(c *cli.Context) error {
 	}
 	gitter.Request(category, filename)
 
-	log.Printf("Requested: %s/%s.\n", category, filename)
 	log.Println("Mission Complete. Adios!")
 	return nil
 }
@@ -157,7 +155,6 @@ func complete(c *cli.Context) error {
 		log.Fatalln("Your translation is not complete. Please complete it and try again.")
 	}
 
-	log.Printf("Completed: %s/%s.\n", category, filename)
 	log.Println("Mission Complete. Adios!")
 	return nil
 }
