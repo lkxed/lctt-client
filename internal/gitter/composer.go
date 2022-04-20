@@ -190,6 +190,7 @@ func Complete(category string, filename string, force bool) error {
 
 func Clean() error {
 	open()
+	checkout(UpstreamBranch)
 
 	filenames, err := helper.ListDir(helper.TmpDir)
 	if err != nil || len(filenames) == 0 {

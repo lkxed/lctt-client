@@ -20,8 +20,10 @@ func inspectOpened() {
 func isCurrentBranch(branch string) bool {
 	name := plumbing.NewBranchReferenceName(branch)
 	head, err := repository.Head()
-	helper.ExitIfError(err)
-	return name == head.Name()
+	if err != nil || name != head.Name() {
+		return false
+	}
+	return true
 }
 
 func hasBranch(name plumbing.ReferenceName) bool {
