@@ -86,8 +86,8 @@ func collect(c *cli.Context) error {
 		editCmd = append(editCmd, tmpPath)
 		log.Printf("Previewing article in %s...\n", editCmd[0])
 		cmd := exec.Command(editCmd[0], editCmd[1:]...)
-		log.Println("Modifications have been saved.")
 		helper.ExitIfError(cmd.Run())
+		log.Println("Modifications have been saved.")
 	}
 	var category string
 	if c.Bool("upload") {
