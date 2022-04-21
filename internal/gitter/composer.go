@@ -121,15 +121,10 @@ func Complete(category string, filename string, force bool) error {
 	branch := initBranch(filename)
 	checkout(branch)
 
-	sourcesRelativePath := path.Join("sources", category, filename)
-	sourcesPath := path.Join(LocalRepository, sourcesRelativePath)
-	// Copy it to "tmp/" folder and process there
-	tmpPath := path.Join(helper.TmpDir, filename)
-	helper.Copy(sourcesPath, tmpPath)
-
 	// Process file: Decide whether the translation is complete by
 	// checking if Chinese characters consist more than 15% of it.
 	// This is a rough estimation, better algorithms needed.
+	tmpPath := path.Join(helper.TmpDir, filename)
 	content := string(helper.ReadFile(tmpPath))
 	rest := strings.Split(content, "======")[1]
 	translation := strings.Split(rest,
@@ -159,6 +154,8 @@ func Complete(category string, filename string, force bool) error {
 	helper.Copy(tmpPath, translatedPath)
 
 	// Remove the source for git operations.
+	sourcesRelativePath := path.Join("sources", category, filename)
+	sourcesPath := path.Join(LocalRepository, sourcesRelativePath)
 	helper.Remove(sourcesPath)
 
 	// Check worktree status to make sure changes have been made.
