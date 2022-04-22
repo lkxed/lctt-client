@@ -151,6 +151,35 @@ func request(c *cli.Context) error {
 	return nil
 }
 
+func list(c *cli.Context) error {
+	log.Println("Listing...")
+
+	category := c.String("category")
+	categories := []string{"news", "talk", "tech"}
+	if !helper.StringSliceContains(categories, category) {
+		log.Fatalln("To upload, you must specify the <CATEGORY>.")
+	}
+	filenames := gitter.List(category)
+	if len(filenames) == 0 {
+		return nil
+	}
+	fmt.Println()
+	fmt.Println("[ARTICLE LIST]")
+	fmt.Println()
+	for _, filename := range filenames {
+		if filename == "README.md" {
+			continue
+		}
+		fmt.Printf("- [%s]: %s\n", category, filename)
+	}
+	fmt.Println()
+	fmt.Println("[END]")
+	fmt.Println()
+	log.Println("Have you made up your mind? If so, choose an article to `collect`.")
+	log.Println("Anyway, Mission Complete. Adios!")
+	return nil
+}
+
 func complete(c *cli.Context) error {
 	if c.NArg() != 1 {
 		log.Fatalln(c.Command.Usage)

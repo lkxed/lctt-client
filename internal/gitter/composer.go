@@ -63,6 +63,15 @@ func Collect(category string, filename string) {
 	log.Printf("Collected: %s.\n", relativePath)
 }
 
+func List(category string) []string {
+	contentPath := path.Join("sources", category)
+	filenames, err := getDirFilenames(contentPath)
+	if err != nil {
+		return nil
+	}
+	return filenames
+}
+
 // Request to translate an article.
 func Request(category string, filename string) {
 	open()

@@ -100,6 +100,18 @@ where <CATEGORY> can be "news", "talk" and "tech" and <LINK> belongs to a websit
 				Action: collect,
 			},
 			{
+				Name:  "list",
+				Usage: "Lists latest 10 articles belongs to the given <CATEGORY>",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:    "category",
+						Aliases: []string{"c"},
+						Usage:   "Specifies the `<CATEGORY>` of articles you are interested in.",
+					},
+				},
+				Action: list,
+			},
+			{
 				Name:                   "request",
 				UseShortOptionHandling: true,
 				Usage:                  "Requests to translate an article with its <CATEGORY> and <FILENAME>",

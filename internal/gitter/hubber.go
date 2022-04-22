@@ -8,6 +8,22 @@ import (
 	"path"
 )
 
+func getDirFilenames(contentPath string) ([]string, error) {
+	log.Printf("Getting direcotry filenames with path `%s`...", contentPath)
+
+	owner := UpstreamOwner
+	repo := path.Base(UpstreamRepository)
+	_, directoryContent, _, err := client.Repositories.GetContents(context.Background(), owner, repo, contentPath, nil)
+	if err != nil {
+		return nil, err
+	}
+	var filenames []string
+	for _, content := range directoryContent {
+		filenames = append(filenames, *content.Name)
+	}
+	return filenames, nil
+}
+
 func fork() *github.Repository {
 	log.Println("Forking upstream...")
 
