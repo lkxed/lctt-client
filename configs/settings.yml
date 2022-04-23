@@ -25,10 +25,10 @@ git:
     username: lkxed
     # To generate your own access-token, read the how-to guide below:
     # https://docs.github.com/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-token
-    access-token: ghp_kUa1diAnFoLLoWGr1atLkXEd0NG1tHu68Ha0D
+    access-token:
     pull-request:
       # Defaults:
-      # - <ACTION>: `手动选题`/`申领原文`/`提交译文`
+      # - <ACTION>: `手动选题`/`申领原文`/`提交译文`/`修改译文`
       # - <CATEGORY>: `news`/`talk`/`tech`
       title: "[<ACTION>][<CATEGORY>]: <FILENAME>"
       # The `body` is essentially the first comment of the PR.

@@ -104,12 +104,12 @@ func clone() {
 	helper.ExitIfError(err)
 }
 
-func add(relativePath string) {
+func add(relativePath string) error {
 	inspectOpened()
 
 	// git add $filepath
 	_, err := worktree.Add(relativePath)
-	helper.ExitIfError(err)
+	return err
 }
 
 func commit(message string) {

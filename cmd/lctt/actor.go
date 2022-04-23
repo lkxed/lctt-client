@@ -96,22 +96,15 @@ func collect(c *cli.Context) error {
 		if !helper.StringSliceContains(categories, category) {
 			log.Fatalln("To upload, you must specify the <CATEGORY>.")
 		}
-		fmt.Print("Are you ready to upload the article? (yes/no) (default: yes): ")
 		var confirmation string
-		_, _ = fmt.Scanln(&confirmation)
-		confirmation = strings.TrimSpace(confirmation)
-		confirmation = strings.ToLower(confirmation)
-		if len(confirmation) == 0 || confirmation == "yes" {
-			gitter.Collect(category, filename)
-			log.Println("Article uploaded. Bravo!")
-		} else {
-			for true {
-				if confirmation == "no" {
-					break
-				}
-				fmt.Print("Are you ready to upload the article? (yes/no) (default: yes): ")
-				_, _ = fmt.Scanln(&confirmation)
+		for true {
+			confirmation = strings.TrimSpace(confirmation)
+			confirmation = strings.ToLower(confirmation)
+			if confirmation == "no" {
+				break
 			}
+			fmt.Print("Are you ready to upload the article? (yes/no) (default: yes): ")
+			_, _ = fmt.Scanln(&confirmation)
 		}
 	}
 
@@ -187,6 +180,30 @@ func complete(c *cli.Context) error {
 	log.Println("Completing...")
 
 	filename := c.Args().Get(0)
+	if c.Bool("modify") {
+		editor := configurar.Settings.Editor
+		if len(configurar.Settings.Editor) == 0 {
+			log.Fatalln("No editor specified in `settings.yml`")
+		}
+		editCmd := strings.Split(editor, " ")
+		tmpPath := path.Join(helper.TmpDir, filename)
+		editCmd = append(editCmd, tmpPath)
+		log.Printf("Opening article in %s...\n", editCmd[0])
+		cmd := exec.Command(editCmd[0], editCmd[1:]...)
+		helper.ExitIfError(cmd.Run())
+
+		var confirmation string
+		for true {
+			confirmation = strings.TrimSpace(confirmation)
+			confirmation = strings.ToLower(confirmation)
+			if confirmation == "no" {
+				break
+			}
+			fmt.Print("Are you ready to upload the article? (yes/no) (default: yes): ")
+			_, _ = fmt.Scanln(&confirmation)
+		}
+	}
+
 	category := c.String("category")
 	categories := []string{"news", "talk", "tech"}
 	if !helper.StringSliceContains(categories, category) {

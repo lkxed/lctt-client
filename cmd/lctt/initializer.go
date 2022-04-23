@@ -144,6 +144,11 @@ where <CATEGORY> can be "news", "talk" and "tech".`,
 						Aliases: []string{"c"},
 						Usage:   "Specifies the `<CATEGORY>` of the article.",
 					},
+					&cli.BoolFlag{
+						Name:    "modify",
+						Aliases: []string{"m"},
+						Usage:   "Modifies the translation.",
+					},
 					&cli.StringFlag{
 						Name:    "force",
 						Aliases: []string{"f"},
