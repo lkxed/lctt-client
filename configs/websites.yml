@@ -62,7 +62,7 @@ kerneltalks.com:
   feed: feed
 
 www.opensourceforu.com:
-  title: .entry-title
+  title: .td-post-title > .entry-title
   summary: .td-post-content > p > em
   author: .td-post-author-name > a
   date: .td-post-date > .entry-date
