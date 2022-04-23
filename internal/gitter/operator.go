@@ -120,7 +120,7 @@ func commit(message string) {
 	if isClean, changes := inspectStatus(); isClean {
 		log.Fatalln("No changes to commit.")
 	} else {
-		log.Println(changes)
+		fmt.Println(changes)
 	}
 
 	// git commit -m $message
