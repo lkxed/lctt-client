@@ -96,15 +96,18 @@ func collect(c *cli.Context) error {
 		if !helper.StringSliceContains(categories, category) {
 			log.Fatalln("To upload, you must specify the <CATEGORY>.")
 		}
-		var confirmation string
+		confirmation := "yes"
 		for true {
-			confirmation = strings.TrimSpace(confirmation)
-			confirmation = strings.ToLower(confirmation)
-			if confirmation == "no" {
-				break
-			}
 			fmt.Print("Are you ready to upload the article? (yes/no) (default: yes): ")
 			_, _ = fmt.Scanln(&confirmation)
+			confirmation = strings.TrimSpace(confirmation)
+			confirmation = strings.ToLower(confirmation)
+			if confirmation == "no" || confirmation == "yes" {
+				break
+			}
+		}
+		if confirmation == "yes" {
+			gitter.Collect(category, filename)
 		}
 	}
 
@@ -192,15 +195,15 @@ func complete(c *cli.Context) error {
 		cmd := exec.Command(editCmd[0], editCmd[1:]...)
 		helper.ExitIfError(cmd.Run())
 
-		var confirmation string
+		confirmation := "yes"
 		for true {
-			confirmation = strings.TrimSpace(confirmation)
-			confirmation = strings.ToLower(confirmation)
-			if confirmation == "no" {
-				break
-			}
 			fmt.Print("Are you ready to upload the article? (yes/no) (default: yes): ")
 			_, _ = fmt.Scanln(&confirmation)
+			confirmation = strings.TrimSpace(confirmation)
+			confirmation = strings.ToLower(confirmation)
+			if confirmation == "no" || confirmation == "yes" {
+				break
+			}
 		}
 	}
 
