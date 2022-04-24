@@ -14,28 +14,12 @@ func ClearSpace(s string) string {
 func TrimSpace(s string) string {
 	s = strings.TrimSpace(s)
 	for strings.HasPrefix(s, "\n") || strings.HasPrefix(s, "\t") {
-		s = TrimLeft(s, "\n")
-		s = TrimLeft(s, "\t")
+		s = strings.TrimPrefix(s, "\n")
+		s = strings.TrimPrefix(s, "\t")
 	}
 	for strings.HasSuffix(s, "\n") || strings.HasSuffix(s, "\t") {
-		s = TrimRight(s, "\n")
-		s = TrimRight(s, "\t")
-	}
-	return s
-}
-
-func TrimRight(s string, cut string) string {
-	lastIndex := strings.LastIndex(s, cut)
-	if len(s)-lastIndex == len(cut) {
-		return s[:lastIndex]
-	}
-	return s
-}
-
-func TrimLeft(s string, cut string) string {
-	index := strings.Index(s, cut)
-	if index == 0 {
-		return s[len(cut):]
+		s = strings.TrimSuffix(s, "\n")
+		s = strings.TrimSuffix(s, "\t")
 	}
 	return s
 }
@@ -51,5 +35,10 @@ func ConcatUrl(baseUrl string, url string) string {
 }
 
 func ConcatFilename(date string, title string) string {
+	title = strings.ReplaceAll(title, ":", "-")
+	title = strings.ReplaceAll(title, `"`, "-")
+	title = strings.ReplaceAll(title, `\`, "-")
+	title = strings.ReplaceAll(title, "/", "-")
+	title = strings.ReplaceAll(title, "'", "-")
 	return date + " " + title + ".md"
 }
