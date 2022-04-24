@@ -122,36 +122,39 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 			} else if s.Is("h4") {
 				texts = append(texts, "##### "+s.Text()) // process <h4> tags, there shouldn't be <h5> or smaller ones
 			} else if s.Is("p") { // process <p> tags
-				text := helper.ClearSpace(s.Text())
-				if len(text) > 0 {
-					// process inner <a> tags
-					s.Find("a").Each(func(_ int, as *goquery.Selection) {
-						urlNo++
-						url := as.AttrOr("href", "")
-						if !strings.HasPrefix(url, "#") { // ignore in-page anchors
-							urls = append(urls, url)
-							a := helper.ClearSpace(as.Text())
-							substitute := "[" + a + "][" + strconv.Itoa(urlNo) + "]"
-							text = strings.ReplaceAll(text, a, substitute)
+				hasLiParents := s.ParentsFiltered("li").Size() > 0
+				if !hasLiParents {
+					text := helper.ClearSpace(s.Text())
+					if len(text) > 0 {
+						// process inner <a> tags
+						s.Find("a").Each(func(_ int, as *goquery.Selection) {
+							urlNo++
+							url := as.AttrOr("href", "")
+							if !strings.HasPrefix(url, "#") { // ignore in-page anchors
+								urls = append(urls, url)
+								a := helper.ClearSpace(as.Text())
+								substitute := "[" + a + "][" + strconv.Itoa(urlNo) + "]"
+								text = strings.ReplaceAll(text, a, substitute)
+							}
+						})
+						s.ChildrenFiltered("code, .code, .inline-code").Each(func(_ int, cs *goquery.Selection) {
+							code := cs.Text()
+							text = strings.ReplaceAll(text, code, "`"+code+"`")
+						})
+						s.ChildrenFiltered("strong").Each(func(_ int, ss *goquery.Selection) {
+							strong := ss.Text()
+							text = strings.ReplaceAll(text, strong, "**"+strong+"**")
+						})
+						s.ChildrenFiltered("em").Each(func(_ int, es *goquery.Selection) {
+							em := es.Text()
+							text = strings.ReplaceAll(text, em, "*"+em+"*")
+						})
+						hasBlockQuoteParents := s.ParentsFiltered("blockquote").Size() > 0
+						if hasBlockQuoteParents {
+							text = "> " + text
 						}
-					})
-					s.ChildrenFiltered("code, .code, .inline-code").Each(func(_ int, cs *goquery.Selection) {
-						code := cs.Text()
-						text = strings.ReplaceAll(text, code, "`"+code+"`")
-					})
-					s.ChildrenFiltered("strong").Each(func(_ int, ss *goquery.Selection) {
-						strong := ss.Text()
-						text = strings.ReplaceAll(text, strong, "**"+strong+"**")
-					})
-					s.ChildrenFiltered("em").Each(func(_ int, es *goquery.Selection) {
-						em := es.Text()
-						text = strings.ReplaceAll(text, em, "*"+em+"*")
-					})
-					hasBlockQuoteParents := s.ParentsFiltered("blockquote").Size() > 0
-					if hasBlockQuoteParents {
-						text = "> " + text
+						texts = append(texts, text)
 					}
-					texts = append(texts, text)
 				}
 			} else if s.Is("span") {
 				otherTags := strings.ReplaceAll(tags, "span, ", "")
