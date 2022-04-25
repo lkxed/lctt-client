@@ -116,7 +116,7 @@ func Request(category string, filename string) {
 
 	title := formatRequestTitle("申领原文", category, filename)
 	body := formatRequestBody("being translated")
-	exists := checkOpenPR(title)
+	exists := checkOpenPR(filename)
 	if !exists {
 		createPR(branch, title, body)
 	}
@@ -163,7 +163,7 @@ func Complete(category string, filename string, force bool) error {
 	helper.Copy(tmpPath, translatedPath)
 
 	title := formatRequestTitle("提交译文", category, filename)
-	exists := checkOpenPR(title)
+	exists := checkOpenPR(filename)
 
 	// Remove the source for git operations.
 	sourcesRelativePath := path.Join("sources", category, filename)

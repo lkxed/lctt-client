@@ -6,6 +6,7 @@ import (
 	"lctt-client/internal/helper"
 	"log"
 	"path"
+	"strings"
 )
 
 func getDirFilenames(contentPath string) ([]string, error) {
@@ -40,10 +41,10 @@ func fork() *github.Repository {
 	return repository
 }
 
-func checkOpenPR(title string) bool {
+func checkOpenPR(filename string) bool {
 	openPRs := listOpenPRs()
 	for _, pr := range openPRs {
-		if title == *pr.Title {
+		if strings.Contains(*pr.Title, filename) {
 			return true
 		}
 	}
