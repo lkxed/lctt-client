@@ -110,6 +110,7 @@ COMMANDS:
    init      （初始化客户端）Initializes the client.
    feed      （获取网站的最新文章列表）Feeds you a list of articles published recently.
    collect   （手动选题）Collects an article with its <CATEGORY> and <LINK>.
+   list      （待翻译列列表）Lists all articles belongs to the given <CATEGORY>.
    request   （申领原文）Requests to translate an article with its <CATEGORY> and <FILENAME>.
    complete  （提交译文）Completes the translating process of an article with its <CATEGORY> and <FILENAME>.
    help, h   （显示帮助）Shows a list of commands or help for one command.

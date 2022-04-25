@@ -101,7 +101,7 @@ where <CATEGORY> can be "news", "talk" and "tech" and <LINK> belongs to a websit
 			},
 			{
 				Name:  "list",
-				Usage: "Lists latest 10 articles belongs to the given <CATEGORY>",
+				Usage: "Lists all articles belongs to the given <CATEGORY>",
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:    "category",
