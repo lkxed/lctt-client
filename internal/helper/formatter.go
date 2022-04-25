@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"regexp"
 	"strings"
 )
 
@@ -35,10 +36,8 @@ func ConcatUrl(baseUrl string, url string) string {
 }
 
 func ConcatFilename(date string, title string) string {
-	title = strings.ReplaceAll(title, ":", "-")
-	title = strings.ReplaceAll(title, `"`, "-")
-	title = strings.ReplaceAll(title, `\`, "-")
-	title = strings.ReplaceAll(title, "/", "-")
-	title = strings.ReplaceAll(title, "'", "-")
+	//  Windows filename can't contain one of these characters: \ / : * ? " < > |
+	re := regexp.MustCompile(`[/\\:*?<>|]`)
+	title = string(re.ReplaceAll([]byte(title), []byte("-")))
 	return date + " " + title + ".md"
 }
