@@ -6,7 +6,7 @@ import (
 )
 
 func TestGenerate(t *testing.T) {
-	article := Parse("https://opensource.com/article/22/4/jvm-parameters-java-developers")
+	article := Parse("https://news.itsfoss.com/shortwave-3-0-release/")
 	filepath, content := Generate(article)
 	fmt.Println(filepath)
 	fmt.Println(string(content))

@@ -109,7 +109,7 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 	var texts []string
 	var urls []string
 	var urlNo int
-	tags := "h2, h3, h4, p, span, amp-img, img, video, iframe, ul, ol, code, pre"
+	tags := "h2, h3, h4, p, span, amp-img, img, amp-video, video, iframe, ul, ol, code, pre"
 	doc.Find(selector).
 		Find(tags).
 		Not(exclusion).
@@ -165,7 +165,8 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 				}
 			} else if s.Is("amp-img, img") { // process <amp-img> & <img> tags
 				hasAmpImgParents := s.ParentsFiltered("amp-img").Size() > 0
-				if s.Is("amp-img") || (s.Is("img") && !hasAmpImgParents) {
+				hidden := s.AttrOr("aria-hidden", "false") == "true"
+				if s.Is("amp-img") || (s.Is("img") && !hidden && !hasAmpImgParents) {
 					urlNo++
 					url := s.AttrOr("src", "")
 					// if src empty, try data-lazy-src attribute
@@ -193,14 +194,18 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 					imgText := "![" + title + "][" + strconv.Itoa(urlNo) + "]"
 					texts = append(texts, imgText)
 				}
-			} else if s.Is("video") { // process HTML5 <video> tags
-				urlNo++
-				url := s.AttrOr("src", "")
-				if len(url) == 0 {
-					url = s.Find("source").First().AttrOr("src", "")
+			} else if s.Is("amp-video, video") { // process <amp-video> & HTML5 <video> tags
+				hasAmpVideoParents := s.ParentsFiltered("amp-video").Size() > 0
+				if s.Is("amp-video") || (s.Is("video") && !hasAmpVideoParents) {
+					urlNo++
+					url := s.AttrOr("src", "")
+					source := s.Find("source")
+					if len(url) == 0 && source.Size() > 0 {
+						url = source.First().AttrOr("src", "")
+					}
+					urls = append(urls, url)
+					texts = append(texts, "![]["+strconv.Itoa(urlNo)+"]")
 				}
-				urls = append(urls, url)
-				texts = append(texts, "![]["+strconv.Itoa(urlNo)+"]")
 			} else if s.Is("iframe") { // process YouTube Embed Videos <iframe> tags
 				urlNo++
 				url := s.AttrOr("src", "")
