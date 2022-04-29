@@ -67,7 +67,7 @@ www.opensourceforu.com:
   author: .td-post-author-name > a
   date: .td-post-date > .entry-date
   content: .td-post-content
-  exclusion:
+  exclusion: .td-a-rec *
   feed: feed
 
 www.linux.com:
