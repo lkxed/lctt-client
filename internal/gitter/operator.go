@@ -170,7 +170,7 @@ func push(branch string) {
 		//Force: 	true,
 	})
 	if err == nil {
-		log.Printf("Pushed: to %s:%s\n.", UpstreamOwner, UpstreamBranch)
+		log.Printf("Pushed: to %s:%s\n.", Username, UpstreamBranch)
 	} else if err == git.NoErrAlreadyUpToDate {
 		log.Println("Already up-to-date.")
 	} else {
