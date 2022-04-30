@@ -116,7 +116,7 @@ func Request(category string, filename string) {
 
 	title := formatRequestTitle("申领原文", category, filename)
 	body := formatRequestBody("being translated")
-	exists := checkOpenPR(filename)
+	exists := checkOpenPRContains(filename)
 	if !exists {
 		createPR(branch, title, body)
 	}
@@ -163,28 +163,28 @@ func Complete(category string, filename string, force bool) error {
 	helper.Copy(tmpPath, translatedPath)
 
 	title := formatRequestTitle("提交译文", category, filename)
-	exists := checkOpenPR(filename)
+	exists := checkOpenPRContains(filename)
+	existsComplete := checkOpenPRContains(title)
 
-	// Remove the source for git operations.
-	sourcesRelativePath := path.Join("sources", category, filename)
-	sourcesPath := path.Join(LocalRepository, sourcesRelativePath)
-	if !exists {
+	if !existsComplete {
+		// Remove the source for git operations.
+		sourcesRelativePath := path.Join("sources", category, filename)
+		sourcesPath := path.Join(LocalRepository, sourcesRelativePath)
 		helper.Remove(sourcesPath)
+
+		// Add file deletion & creation changes.
+		err := add(sourcesRelativePath)
+		helper.ExitIfError(err)
 	}
+
+	err := add(translatedRelativePath)
+	helper.ExitIfError(err)
 
 	// Check worktree status to make sure changes have been made.
 	checkWorkTreeStatus()
 
-	// Add file deletion & creation changes.
-	if !exists {
-		err := add(sourcesRelativePath)
-		helper.ExitIfError(err)
-	}
-	err := add(translatedRelativePath)
-	helper.ExitIfError(err)
-
 	action := "提交译文"
-	if exists {
+	if existsComplete {
 		action = "修改译文"
 	}
 	message := formatCommitMessage(action, category, filename)

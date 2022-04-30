@@ -41,10 +41,10 @@ func fork() *github.Repository {
 	return repository
 }
 
-func checkOpenPR(filename string) bool {
+func checkOpenPRContains(title string) bool {
 	openPRs := listOpenPRs()
 	for _, pr := range openPRs {
-		if strings.Contains(*pr.Title, filename) {
+		if strings.Contains(*pr.Title, title) {
 			return true
 		}
 	}
