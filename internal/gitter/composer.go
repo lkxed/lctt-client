@@ -169,12 +169,18 @@ func Complete(category string, filename string, force bool) error {
 	exists := checkOpenPRContains(filename)
 	existsComplete := checkOpenPRContains(title)
 
+	sourcesRelativePath := path.Join("sources", category, filename)
+	sourcesPath := path.Join(LocalRepository, sourcesRelativePath)
+
 	if !existsComplete {
 		// Remove the source for git operations.
-		sourcesRelativePath := path.Join("sources", category, filename)
-		sourcesPath := path.Join(LocalRepository, sourcesRelativePath)
 		helper.Remove(sourcesPath)
+	}
 
+	// Check worktree status to make sure changes have been made.
+	checkWorkTreeStatus()
+
+	if !existsComplete {
 		// Add file deletion & creation changes.
 		err := add(sourcesRelativePath)
 		helper.ExitIfError(err)
@@ -182,9 +188,6 @@ func Complete(category string, filename string, force bool) error {
 
 	err := add(translatedRelativePath)
 	helper.ExitIfError(err)
-
-	// Check worktree status to make sure changes have been made.
-	checkWorkTreeStatus()
 
 	action := "提交译文"
 	if existsComplete {

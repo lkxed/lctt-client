@@ -109,7 +109,7 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 	var texts []string
 	var urls []string
 	var urlNo int
-	tags := "h2, h3, h4, p, span, amp-img, img, amp-video, video, iframe, ul, ol, code, pre"
+	tags := "h2, h3, h4, p, span, amp-img, img, amp-video, video, iframe, ul, ol, code, pre, td"
 	doc.Find(selector).
 		Find(tags).
 		Not(exclusion).
@@ -248,6 +248,22 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 						text := "```\n" + code + "\n```"
 						texts = append(texts, text)
 					}
+				}
+			} else if s.Is("td") {
+				var text string
+				s.Contents().Each(func(_ int, tds *goquery.Selection) {
+					if goquery.NodeName(tds) == "#text" {
+						text += tds.Text()
+					} else if tds.Is("strong") {
+						text = text + "**" + tds.Text() + "**"
+					} else if tds.Is("em") {
+						text = text + "*" + tds.Text() + "*"
+					}
+				})
+				check := strings.ReplaceAll(text, "*", "")
+				if len(helper.ClearSpace(check)) > 0 {
+					text = helper.ClearSpace(text)
+					texts = append(texts, text)
 				}
 			}
 		})
