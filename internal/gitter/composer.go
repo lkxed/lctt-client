@@ -34,6 +34,7 @@ func Initialize() {
 // Collect an article.
 func Collect(category string, filename string) {
 	open()
+	checkout(UpstreamBranch)
 	pull()
 
 	branch := initBranch(filename)
@@ -75,6 +76,7 @@ func List(category string) []string {
 // Request to translate an article.
 func Request(category string, filename string) {
 	open()
+	checkout(UpstreamBranch)
 
 	branch := initBranch(filename)
 	checkout(branch)
@@ -126,6 +128,7 @@ func Request(category string, filename string) {
 
 func Complete(category string, filename string, force bool) error {
 	open()
+	checkout(UpstreamBranch)
 
 	branch := initBranch(filename)
 	checkout(branch)
