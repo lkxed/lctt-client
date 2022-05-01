@@ -59,6 +59,6 @@ func inspectStatus() (bool, string) {
 		s = strings.ReplaceAll(s, "D  ", "[-] ")
 		s = strings.ReplaceAll(s, "M  ", "[M] ")
 	}
-	s = helper.TrimSpace(s)
+	s = strings.TrimSpace(s)
 	return status.IsClean(), s
 }

@@ -38,7 +38,7 @@ func Parse(link string) Article {
 
 	// Parse the title
 	title := doc.Find(website.Title).First().Text()
-	title = helper.ClearSpace(title)
+	title = strings.TrimSpace(title)
 
 	// Parse the summary
 	// css pseudo-class :first-child is not supported, hence the workaround
@@ -46,7 +46,7 @@ func Parse(link string) Article {
 	summarySelector = strings.ReplaceAll(summarySelector, ":first-child", "")
 	summary := doc.Find(summarySelector).First().Text()
 	// note that summary is treated as plain text (without styles)
-	summary = helper.ClearSpace(summary)
+	summary = strings.TrimSpace(summary)
 
 	// Parse the author
 	author := parseAuthor(doc, website.Author, baseUrl)
@@ -66,13 +66,13 @@ func parseAuthor(doc *goquery.Document, selector string, baseUrl string) Author 
 	if authorAnchor.Size() == 0 { // means the author is manually specified
 		authorInfo := strings.Split(selector, ",")
 		authorName := authorInfo[0]
-		authorLink := helper.ClearSpace(authorInfo[1])
+		authorLink := strings.TrimSpace(authorInfo[1])
 		author = Author{Name: authorName, Link: authorLink}
 	} else {
 		authorLink := authorAnchor.AttrOr("href", "")
 		authorLink = helper.ConcatUrl(baseUrl, authorLink)
 		authorName := authorAnchor.Text()
-		authorName = helper.ClearSpace(authorName)
+		authorName = strings.TrimSpace(authorName)
 		author = Author{Name: authorName, Link: authorLink}
 	}
 	return author
@@ -95,7 +95,7 @@ func parseDate(doc *goquery.Document, selector string) string {
 	// final approach: try the date layout below
 	if len(date) == 0 && dateNode.Size() > 0 {
 		dateText := dateNode.First().Text()
-		dateText = helper.ClearSpace(dateText)
+		dateText = strings.TrimSpace(dateText)
 		parsedTime, parseError := time.Parse("January 2, 2006", dateText)
 		if parseError != nil { // shouldn't leave date empty, should we?
 			parsedTime = time.Now()
@@ -124,43 +124,56 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 			} else if s.Is("p") { // process <p> tags
 				hasLiParents := s.ParentsFiltered("li").Size() > 0
 				if !hasLiParents {
-					text := helper.ClearSpace(s.Text())
-					if len(text) > 0 {
-						// process inner <a> tags
-						s.Find("a").Each(func(_ int, as *goquery.Selection) {
+					var text string
+					s.Contents().Each(func(_ int, ps *goquery.Selection) {
+						if ps.Is("a") {
 							urlNo++
-							url := as.AttrOr("href", "")
+							url := ps.AttrOr("href", "")
 							if !strings.HasPrefix(url, "#") { // ignore in-page anchors
 								urls = append(urls, url)
-								a := helper.ClearSpace(as.Text())
-								substitute := "[" + a + "][" + strconv.Itoa(urlNo) + "]"
-								text = strings.ReplaceAll(text, a, substitute)
+								a := strings.TrimSpace(ps.Text())
+								a = "[" + a + "][" + strconv.Itoa(urlNo) + "]"
+								text += a
 							}
-						})
-						s.ChildrenFiltered("code, .code, .inline-code").Each(func(_ int, cs *goquery.Selection) {
-							code := cs.Text()
-							text = strings.ReplaceAll(text, code, "`"+code+"`")
-						})
-						s.ChildrenFiltered("strong").Each(func(_ int, ss *goquery.Selection) {
-							strong := ss.Text()
-							text = strings.ReplaceAll(text, strong, "**"+strong+"**")
-						})
-						s.ChildrenFiltered("em").Each(func(_ int, es *goquery.Selection) {
-							em := es.Text()
-							text = strings.ReplaceAll(text, em, "*"+em+"*")
-						})
-						hasBlockQuoteParents := s.ParentsFiltered("blockquote").Size() > 0
-						if hasBlockQuoteParents {
-							text = "> " + text
+						} else if ps.Is("code, .code, .inline-code") {
+							code := strings.TrimSpace(ps.Text())
+							if len(code) > 0 {
+								code = "`" + code + "`"
+								text += code
+							}
+						} else if ps.Is("strong") {
+							strong := strings.TrimSpace(ps.Text())
+							if len(strong) > 0 {
+								strong = "**" + strong + "**"
+								text += strong
+							}
+						} else if ps.Is("em") {
+							em := strings.TrimSpace(ps.Text())
+							if len(em) > 0 {
+								em = "*" + em + "*"
+								text += em
+							}
+						} else {
+							p := ps.Text()
+							m, n := len(text), len(p)
+							if m > 0 && n > 0 && text[m-1] == '`' && p[0] != ' ' && p[0] != '.' && p[0] != ',' {
+								text += " "
+							}
+							text += p
 						}
-						texts = append(texts, text)
+					})
+					hasBlockQuoteParents := s.ParentsFiltered("blockquote").Size() > 0
+					if hasBlockQuoteParents {
+						text = "> " + text
 					}
+					text = strings.TrimSpace(text)
+					texts = append(texts, text)
 				}
 			} else if s.Is("span") {
-				otherTags := strings.ReplaceAll(tags, "span, ", "")
+				otherTags := strings.Replace(tags, "span, ", "", 1)
 				hasOtherTagsParents := s.ParentsFiltered(otherTags).Size() > 0
 				if !hasOtherTagsParents {
-					text := helper.ClearSpace(s.Text())
+					text := strings.TrimSpace(s.Text())
 					texts = append(texts, text)
 				}
 			} else if s.Is("amp-img, img") { // process <amp-img> & <img> tags
@@ -180,7 +193,7 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 					if s.Parent().Is("figure") {
 						cs := s.Parent().Find("figcaption").First()
 						if cs.Size() > 0 {
-							title = helper.TrimSpace(cs.Text())
+							title = strings.TrimSpace(cs.Text())
 						}
 					}
 					// if no <figcaption>, use title instead
@@ -190,6 +203,9 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 					// if missing title, use alt instead
 					if len(title) == 0 {
 						title = s.AttrOr("alt", "")
+					}
+					if len(strings.TrimSpace(title)) > 0 {
+						title = strings.TrimSpace(title)
 					}
 					imgText := "![" + title + "][" + strconv.Itoa(urlNo) + "]"
 					texts = append(texts, imgText)
@@ -216,7 +232,7 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 			} else if s.Is("ul") { // process <ul> tags
 				var items []string
 				s.Find("li").Each(func(_ int, lis *goquery.Selection) {
-					liText := helper.ClearSpace(lis.Text())
+					liText := strings.TrimSpace(lis.Text())
 					if len(liText) > 0 {
 						items = append(items, "* "+liText)
 					}
@@ -229,7 +245,7 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 				var items []string
 				itemNo := 0
 				s.Find("li").Each(func(_ int, lis *goquery.Selection) {
-					liText := helper.ClearSpace(lis.Text())
+					liText := strings.TrimSpace(lis.Text())
 					if len(liText) > 0 {
 						itemNo++
 						items = append(items, strconv.Itoa(itemNo)+". "+liText)
@@ -243,7 +259,7 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 				hasCodeDescendants := s.Find("code").Size() > 0
 				hasPParents := s.ParentsFiltered("p").Size() > 0
 				if (s.Is("pre") && !hasCodeDescendants) || (s.Is("code") && !hasPParents) {
-					code := helper.TrimSpace(s.Text())
+					code := strings.TrimSpace(s.Text())
 					if len(code) > 0 {
 						text := "```\n" + code + "\n```"
 						texts = append(texts, text)
@@ -261,8 +277,8 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 					}
 				})
 				check := strings.ReplaceAll(text, "*", "")
-				if len(helper.ClearSpace(check)) > 0 {
-					text = helper.ClearSpace(text)
+				if len(strings.TrimSpace(check)) > 0 {
+					text = strings.TrimSpace(text)
 					texts = append(texts, text)
 				}
 			}

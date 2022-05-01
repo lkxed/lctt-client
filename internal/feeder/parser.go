@@ -42,7 +42,7 @@ func parse(link string) []Item {
 		helper.ExitIfError(err)
 		// set summary as the first non-empty <p>'s text
 		doc.Find("p").EachWithBreak(func(i int, s *goquery.Selection) bool {
-			text := helper.ClearSpace(s.Text())
+			text := strings.TrimSpace(s.Text())
 			if len(text) != 0 {
 				summary = text
 				return false

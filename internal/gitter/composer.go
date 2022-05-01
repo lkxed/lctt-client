@@ -141,7 +141,7 @@ func Complete(category string, filename string, force bool) error {
 	rest := strings.Split(content, "======")[1]
 	translation := strings.Split(rest,
 		"--------------------------------------------------------------------------------")[0]
-	translation = helper.ClearSpace(translation)
+	translation = strings.TrimSpace(translation)
 	var count int
 	for _, c := range translation {
 		if unicode.Is(unicode.Han, c) {
