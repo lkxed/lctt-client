@@ -58,7 +58,10 @@ func Collect(category string, filename string) {
 
 	title := formatRequestTitle("手动选题", category, filename)
 	body := formatRequestBody("collected")
-	createPR(branch, title, body)
+	exists := checkOpenPRContains(filename)
+	if !exists {
+		createPR(branch, title, body)
+	}
 
 	checkout(UpstreamBranch)
 	log.Printf("Collected: %s.\n", relativePath)
