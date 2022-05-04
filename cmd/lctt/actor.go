@@ -31,9 +31,9 @@ func feed(c *cli.Context) error {
 	items := feeder.ParseAll()
 	datePtr := c.Timestamp("since")
 	var date time.Time
+	yesterday := time.Now().AddDate(0, 0, -1).Format(layout)
 	if datePtr == nil {
-		today := time.Now().Format(layout)
-		date, _ = time.Parse(layout, today)
+		date, _ = time.Parse(layout, yesterday)
 	} else {
 		date = *datePtr
 	}
