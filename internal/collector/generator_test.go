@@ -6,7 +6,7 @@ import (
 )
 
 func TestGenerate(t *testing.T) {
-	article := Parse("https://opensource.com/article/22/4/go-build-options")
+	article := Parse("https://ostechnix.com/php-mysql-where-clause/")
 	filepath, content := Generate(article)
 	fmt.Println(filepath)
 	fmt.Println(string(content))

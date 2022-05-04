@@ -182,8 +182,15 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 				if s.Is("amp-img") || (s.Is("img") && !hidden && !hasAmpImgParents) {
 					urlNo++
 					url := s.AttrOr("src", "")
-					// if src empty, try data-lazy-src attribute
-					if len(url) == 0 || strings.HasPrefix(url, "data:image") {
+					if strings.HasPrefix(url, "data:image") {
+						url = ""
+					}
+					// if src empty, try data-src attribute
+					if url == "" {
+						url = s.AttrOr("data-src", "")
+					}
+					// if data-src empty, try data-lazy-src attribute
+					if url == "" {
 						url = s.AttrOr("data-lazy-src", "")
 					}
 					url = helper.ConcatUrl(baseUrl, url)
