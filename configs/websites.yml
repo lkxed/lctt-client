@@ -31,7 +31,7 @@ www.debugpoint.com:
   author: .auth-name > a
   date: time[itemprop="datePublished"]
   content: .s-post-content
-  exclusion: .sharedaddy *, hr + p
+  exclusion: .sharedaddy *, hr + p, a > img
   feed: feed
 
 fedoramagazine.org:
