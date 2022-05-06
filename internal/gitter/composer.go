@@ -78,6 +78,13 @@ func List(category string) []string {
 
 // Request to translate an article.
 func Request(category string, filename string) {
+	relativePath := path.Join("sources", category, filename)
+	filepath := path.Join(LocalRepository, relativePath)
+	exists := helper.CheckPath(filepath)
+	if !exists {
+		log.Fatalf("Invalid path: %s.\n", filepath)
+	}
+
 	open()
 	checkout(UpstreamBranch)
 
@@ -85,8 +92,6 @@ func Request(category string, filename string) {
 	checkout(branch)
 
 	// Update the file, fill in translator's GitHub username.
-	relativePath := path.Join("sources", category, filename)
-	filepath := path.Join(LocalRepository, relativePath)
 	// Copy it to "tmp/" folder and process there
 	tmpPath := path.Join(helper.TmpDir, filename)
 	helper.Copy(filepath, tmpPath)
@@ -121,7 +126,7 @@ func Request(category string, filename string) {
 
 	title := formatRequestTitle("申领原文", category, filename)
 	body := formatRequestBody("being translated")
-	exists := checkOpenPRContains(filename)
+	exists = checkOpenPRContains(filename)
 	if !exists {
 		createPR(branch, title, body)
 	}
@@ -130,6 +135,12 @@ func Request(category string, filename string) {
 }
 
 func Complete(category string, filename string, force bool) error {
+	tmpPath := path.Join(helper.TmpDir, filename)
+	exists := helper.CheckPath(tmpPath)
+	if !exists {
+		log.Fatalf("Invalid path: %s.\n", tmpPath)
+	}
+
 	open()
 	checkout(UpstreamBranch)
 
@@ -139,7 +150,6 @@ func Complete(category string, filename string, force bool) error {
 	// Process file: Decide whether the translation is complete by
 	// checking if Chinese characters consist more than 15% of it.
 	// This is a rough estimation, better algorithms needed.
-	tmpPath := path.Join(helper.TmpDir, filename)
 	content := string(helper.ReadFile(tmpPath))
 	rest := strings.Split(content, "======")[1]
 	translation := strings.Split(rest,
@@ -169,7 +179,7 @@ func Complete(category string, filename string, force bool) error {
 	helper.Copy(tmpPath, translatedPath)
 
 	title := formatRequestTitle("提交译文", category, filename)
-	exists := checkOpenPRContains(filename)
+	exists = checkOpenPRContains(filename)
 	existsComplete := checkOpenPRContains(title)
 
 	sourcesRelativePath := path.Join("sources", category, filename)
