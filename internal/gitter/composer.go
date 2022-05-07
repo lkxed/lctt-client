@@ -148,7 +148,7 @@ func Complete(category string, filename string, force bool) error {
 	checkout(branch)
 
 	// Process file: Decide whether the translation is complete by
-	// checking if Chinese characters consist more than 15% of it.
+	// checking if Chinese bytes consist more than 75% of it.
 	// This is a rough estimation, better algorithms needed.
 	content := string(helper.ReadFile(tmpPath))
 	rest := strings.Split(content, "======")[1]
@@ -161,9 +161,9 @@ func Complete(category string, filename string, force bool) error {
 			count++
 		}
 	}
-	zhHansPercentage := float64(count) / float64(len(translation))
+	zhHansPercentage := float64(count) * 4 / float64(len(translation))
 	log.Printf("Chinese characters consist %.1f%% of your translation.\n", zhHansPercentage*100)
-	if !force && zhHansPercentage < 0.15 {
+	if !force && zhHansPercentage <= 0.75 {
 		return errors.New("translation not completed")
 	}
 
