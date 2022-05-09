@@ -17,7 +17,7 @@ func ConcatUrl(baseUrl string, url string) string {
 
 func ConcatFilename(date string, title string) string {
 	//  Windows filename can't contain one of these characters: \ / : * ? " < > |
-	re := regexp.MustCompile(`[\\/:*?"<>|]`)
+	re := regexp.MustCompile(`[\\/:*?"“”<>|]`)
 	title = string(re.ReplaceAll([]byte(title), []byte("-")))
 	return date + " " + title + ".md"
 }
