@@ -94,7 +94,7 @@ ostechnix.com:
   author: .byline > .author > a
   date: .entry-date
   content: div#ftwp-postcontent
-  exclusion:
+  exclusion: div#ftwp-container-outer *
   feed: feed
 
 www.linuxuprising.com:
