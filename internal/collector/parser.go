@@ -236,28 +236,33 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 				url = strings.ReplaceAll(url, "www.youtube.com/embed", "youtu.be")
 				urls = append(urls, url)
 				texts = append(texts, "![A Video from YouTube]["+strconv.Itoa(urlNo)+"]")
-			} else if s.Is("ul") { // process <ul> tags
-				var items []string
-				s.Find("li").Each(func(_ int, lis *goquery.Selection) {
-					liText := strings.TrimSpace(lis.Text())
-					if len(liText) > 0 {
-						items = append(items, "* "+liText)
-					}
-				})
-				if len(items) > 0 {
-					text := strings.Join(items, "\n")
-					texts = append(texts, text)
-				}
-			} else if s.Is("ol") { // process <ol> tags
+			} else if s.Is("ul") || s.Is("ol") { // process <ul> & <ol> tags
 				var items []string
 				itemNo := 0
 				s.Find("li").Each(func(_ int, lis *goquery.Selection) {
 					liText := strings.TrimSpace(lis.Text())
+					// process <a> tags inside each <li> tag
+					lis.Find("a").Each(func(_ int, as *goquery.Selection) {
+						urlNo++
+						url := as.AttrOr("href", "")
+						if !strings.HasPrefix(url, "#") { // ignore in-page anchors
+							urls = append(urls, url)
+							aOld := strings.TrimSpace(as.Text())
+							aNew := "[" + aOld + "][" + strconv.Itoa(urlNo) + "]"
+							liText = strings.Replace(liText, aOld, aNew, 1)
+						}
+					})
 					if len(liText) > 0 {
-						itemNo++
-						items = append(items, strconv.Itoa(itemNo)+". "+liText)
+						if s.Is("ol") {
+							itemNo++
+							liText = strconv.Itoa(itemNo) + ". " + liText
+						} else {
+							liText = "* " + liText
+						}
 					}
+					items = append(items, liText)
 				})
+				itemNo = 0
 				if len(items) > 0 {
 					text := strings.Join(items, "\n")
 					texts = append(texts, text)
