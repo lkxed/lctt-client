@@ -6,6 +6,7 @@ import (
 	"lctt-client/internal/helper"
 	"log"
 	"path"
+	"regexp"
 	"strings"
 	"unicode"
 )
@@ -152,16 +153,23 @@ func Complete(category string, filename string, force bool) error {
 	// This is a rough estimation, better algorithms needed.
 	content := string(helper.ReadFile(tmpPath))
 	rest := strings.Split(content, "======")[1]
+	// extract main content
 	translation := strings.Split(rest,
 		"--------------------------------------------------------------------------------")[0]
-	translation = strings.TrimSpace(translation)
+	// exclude code blocks
+	re := regexp.MustCompile("```[\\w|\\W]*```")
+	translation = string(re.ReplaceAll([]byte(translation), []byte{}))
+	// exclude spaces
+	translation = strings.ReplaceAll(translation, " ", "")
+	translation = strings.ReplaceAll(translation, "\n", "")
+	translation = strings.ReplaceAll(translation, "\t", "")
 	var count int
 	for _, c := range translation {
 		if unicode.Is(unicode.Han, c) {
 			count++
 		}
 	}
-	zhHansPercentage := float64(count) * 4 / float64(len(translation))
+	zhHansPercentage := float64(count) * 3 / float64(len(translation))
 	log.Printf("Chinese characters consist %.1f%% of your translation.\n", zhHansPercentage*100)
 	if !force && zhHansPercentage <= 0.75 {
 		return errors.New("translation not completed")
