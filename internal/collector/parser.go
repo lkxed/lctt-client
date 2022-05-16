@@ -159,6 +159,16 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 					} else if ps.Is("em") {
 						em := strings.TrimSpace(ps.Text())
 						if len(em) > 0 {
+							aChildren := ps.ChildrenFiltered("a")
+							if aChildren.Size() > 0 {
+								url := aChildren.First().AttrOr("href", "")
+								if url != "" {
+									urlNo++
+									url = helper.ConcatUrl(baseUrl, url)
+									urls = append(urls, url)
+									em = "[" + em + "][" + strconv.Itoa(urlNo) + "]"
+								}
+							}
 							em = "*" + em + "*"
 							text += em
 						}
