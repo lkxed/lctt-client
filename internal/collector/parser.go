@@ -124,7 +124,7 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 			if !hasLiParents {
 				var text string
 				s.Contents().Each(func(_ int, ps *goquery.Selection) {
-					if ps.Is("a") {
+					if ps.Is("a") && ps.Find("img").Size() == 0 {
 						urlNo++
 						url := ps.AttrOr("href", "")
 						if !strings.HasPrefix(url, "#") { // ignore in-page anchors
@@ -170,18 +170,16 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 		} else if s.Is("a") {
 			otherTags := strings.Replace(tags, "a, ", "", 1)
 			hasOtherTagsParents := s.ParentsFiltered(otherTags).Size() > 0
-			if !hasOtherTagsParents {
-				url := s.AttrOr("href", "")
-				url = strings.TrimSpace(url)
-				isInPageAnchor := strings.HasPrefix(url, "#")
-				hasImgChildren := s.Find("img").Size() > 0
-				if url != "" && !isInPageAnchor && !hasImgChildren { // ignore in-page anchors
-					urlNo++
-					urls = append(urls, url)
-					aText := strings.TrimSpace(s.Text())
-					text := "[" + aText + "][" + strconv.Itoa(urlNo) + "]"
-					texts = append(texts, text)
-				}
+			url := s.AttrOr("href", "")
+			url = strings.TrimSpace(url)
+			isInPageAnchor := strings.HasPrefix(url, "#")
+			hasImgChildren := s.Find("img").Size() > 0
+			if url != "" && !hasOtherTagsParents && !isInPageAnchor && !hasImgChildren {
+				urlNo++
+				urls = append(urls, url)
+				aText := strings.TrimSpace(s.Text())
+				text := "[" + aText + "][" + strconv.Itoa(urlNo) + "]"
+				texts = append(texts, text)
 			}
 		} else if s.Is("span") {
 			otherTags := strings.Replace(tags, "span, ", "", 1)
