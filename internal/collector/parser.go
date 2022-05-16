@@ -264,12 +264,21 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 				texts = append(texts, "![]["+strconv.Itoa(urlNo)+"]")
 			}
 		} else if s.Is("iframe") { // process YouTube Embed Videos <iframe> tags
-			urlNo++
 			url := s.AttrOr("src", "")
-			url = strings.Split(url, "?")[0]
-			url = strings.ReplaceAll(url, "www.youtube.com/embed", "youtu.be")
-			urls = append(urls, url)
-			texts = append(texts, "![A Video from YouTube]["+strconv.Itoa(urlNo)+"]")
+			if url == "" {
+				url = s.AttrOr("data-src", "")
+			}
+			if url != "" {
+				urlNo++
+				url = strings.Split(url, "?")[0]
+				url = strings.ReplaceAll(url, "www.youtube.com/embed", "youtu.be")
+				urls = append(urls, url)
+				title := s.AttrOr("title", "")
+				if title == "" {
+					title = "A Video from YouTube"
+				}
+				texts = append(texts, "!["+title+"]["+strconv.Itoa(urlNo)+"]")
+			}
 		} else if s.Is("ul") || s.Is("ol") { // process <ul> & <ol> tags
 			var items []string
 			itemNo := 0
