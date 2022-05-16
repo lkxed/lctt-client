@@ -142,6 +142,15 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 					} else if ps.Is("strong") {
 						strong := strings.TrimSpace(ps.Text())
 						if len(strong) > 0 {
+							aChildren := ps.ChildrenFiltered("a")
+							if aChildren.Size() > 0 {
+								url := aChildren.First().AttrOr("href", "")
+								if url != "" {
+									urlNo++
+									urls = append(urls, url)
+									strong = "[" + strong + "][" + strconv.Itoa(urlNo) + "]"
+								}
+							}
 							strong = "**" + strong + "**"
 							text += strong
 						}

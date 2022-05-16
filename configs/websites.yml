@@ -93,8 +93,8 @@ ostechnix.com:
   summary: .penci-psub-title
   author: .byline > .author > a
   date: .entry-date
-  content: div#ftwp-postcontent
-  exclusion: div#ftwp-container-outer *
+  content: .entry-content
+  exclusion: .wp-block-group *, .post-tags *
   feed: feed
 
 www.linuxuprising.com:

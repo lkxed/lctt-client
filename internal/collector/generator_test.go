@@ -6,7 +6,7 @@ import (
 )
 
 func TestGenerate(t *testing.T) {
-	article := Parse("https://opensource.com/article/22/5/plausible-analytics")
+	article := Parse("https://ostechnix.com/reset-root-password-in-fedora/")
 	filepath, content := Generate(article)
 	fmt.Println(filepath)
 	fmt.Println(string(content))
