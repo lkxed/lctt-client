@@ -109,191 +109,222 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 	var texts []string
 	var urls []string
 	var urlNo int
-	tags := "h2, h3, h4, p, span, amp-img, img, amp-video, video, iframe, ul, ol, code, pre, td"
-	doc.Find(selector).
-		Find(tags).
-		Not(exclusion).
-		// TODO process <code> inside <li>, I forgot the problem...will deal with it when it occurs again
-		Each(func(elementIndex int, s *goquery.Selection) {
-			if s.Is("h2") { // process <h2> tags
-				texts = append(texts, "### "+s.Text())
-			} else if s.Is("h3") { // process <h3> tags
-				texts = append(texts, "#### "+s.Text())
-			} else if s.Is("h4") {
-				texts = append(texts, "##### "+s.Text()) // process <h4> tags, there shouldn't be <h5> or smaller ones
-			} else if s.Is("p") { // process <p> tags
-				hasLiParents := s.ParentsFiltered("li").Size() > 0
-				if !hasLiParents {
-					var text string
-					s.Contents().Each(func(_ int, ps *goquery.Selection) {
-						if ps.Is("a") {
-							urlNo++
-							url := ps.AttrOr("href", "")
-							if !strings.HasPrefix(url, "#") { // ignore in-page anchors
-								urls = append(urls, url)
-								a := strings.TrimSpace(ps.Text())
-								a = "[" + a + "][" + strconv.Itoa(urlNo) + "]"
-								text += a
-							}
-						} else if ps.Is("code, .code, .inline-code") {
-							code := strings.TrimSpace(ps.Text())
-							if len(code) > 0 {
-								code = "`" + code + "`"
-								text += code
-							}
-						} else if ps.Is("strong") {
-							strong := strings.TrimSpace(ps.Text())
-							if len(strong) > 0 {
-								strong = "**" + strong + "**"
-								text += strong
-							}
-						} else if ps.Is("em") {
-							em := strings.TrimSpace(ps.Text())
-							if len(em) > 0 {
-								em = "*" + em + "*"
-								text += em
-							}
-						} else {
-							p := ps.Text()
-							m, n := len(text), len(p)
-							if m > 0 && n > 0 && text[m-1] == '`' && p[0] != ' ' && p[0] != '.' && p[0] != ',' {
-								text += " "
-							}
-							text += p
-						}
-					})
-					hasBlockQuoteParents := s.ParentsFiltered("blockquote").Size() > 0
-					if hasBlockQuoteParents {
-						text = "> " + text
-					}
-					text = strings.TrimSpace(text)
-					texts = append(texts, text)
-				}
-			} else if s.Is("span") {
-				otherTags := strings.Replace(tags, "span, ", "", 1)
-				hasOtherTagsParents := s.ParentsFiltered(otherTags).Size() > 0
-				if !hasOtherTagsParents {
-					text := strings.TrimSpace(s.Text())
-					texts = append(texts, text)
-				}
-			} else if s.Is("amp-img, img") { // process <amp-img> & <img> tags
-				hasAmpImgParents := s.ParentsFiltered("amp-img").Size() > 0
-				hidden := s.AttrOr("aria-hidden", "false") == "true"
-				if s.Is("amp-img") || (s.Is("img") && !hidden && !hasAmpImgParents) {
-					urlNo++
-					url := s.AttrOr("src", "")
-					if strings.HasPrefix(url, "data:image") {
-						url = ""
-					}
-					// if src empty, try data-src attribute
-					if url == "" {
-						url = s.AttrOr("data-src", "")
-					}
-					// if data-src empty, try data-lazy-src attribute
-					if url == "" {
-						url = s.AttrOr("data-lazy-src", "")
-					}
-					url = helper.ConcatUrl(baseUrl, url)
-					urls = append(urls, url)
-					var title string
-					// if in <figure>, try and get <figcaption>
-					if s.Parent().Is("figure") {
-						cs := s.Parent().Find("figcaption").First()
-						if cs.Size() > 0 {
-							title = strings.TrimSpace(cs.Text())
-						}
-					}
-					// if no <figcaption>, use title instead
-					if len(title) == 0 {
-						title = s.AttrOr("title", "")
-					}
-					// if missing title, use alt instead
-					if len(title) == 0 {
-						title = s.AttrOr("alt", "")
-					}
-					if len(strings.TrimSpace(title)) > 0 {
-						title = strings.TrimSpace(title)
-					}
-					imgText := "![" + title + "][" + strconv.Itoa(urlNo) + "]"
-					texts = append(texts, imgText)
-				}
-			} else if s.Is("amp-video, video") { // process <amp-video> & HTML5 <video> tags
-				hasAmpVideoParents := s.ParentsFiltered("amp-video").Size() > 0
-				if s.Is("amp-video") || (s.Is("video") && !hasAmpVideoParents) {
-					urlNo++
-					url := s.AttrOr("src", "")
-					source := s.Find("source")
-					if len(url) == 0 && source.Size() > 0 {
-						url = source.First().AttrOr("src", "")
-					}
-					urls = append(urls, url)
-					texts = append(texts, "![]["+strconv.Itoa(urlNo)+"]")
-				}
-			} else if s.Is("iframe") { // process YouTube Embed Videos <iframe> tags
-				urlNo++
-				url := s.AttrOr("src", "")
-				url = strings.Split(url, "?")[0]
-				url = strings.ReplaceAll(url, "www.youtube.com/embed", "youtu.be")
-				urls = append(urls, url)
-				texts = append(texts, "![A Video from YouTube]["+strconv.Itoa(urlNo)+"]")
-			} else if s.Is("ul") || s.Is("ol") { // process <ul> & <ol> tags
-				var items []string
-				itemNo := 0
-				s.Find("li").Each(func(_ int, lis *goquery.Selection) {
-					liText := strings.TrimSpace(lis.Text())
-					// process <a> tags inside each <li> tag
-					lis.Find("a").Each(func(_ int, as *goquery.Selection) {
+	tags := "h2, h3, h4, p, a, span, amp-img, img, amp-video, video, iframe, ul, ol, code, pre, td"
+	selection := doc.Find(selector).Find(tags).Not(exclusion)
+	// TODO process <code> inside <li>, I forgot the problem...will deal with it when it occurs again
+	selection.Each(func(elementIndex int, s *goquery.Selection) {
+		if s.Is("h2") { // process <h2> tags
+			texts = append(texts, "### "+s.Text())
+		} else if s.Is("h3") { // process <h3> tags
+			texts = append(texts, "#### "+s.Text())
+		} else if s.Is("h4") {
+			texts = append(texts, "##### "+s.Text()) // process <h4> tags, there shouldn't be <h5> or smaller ones
+		} else if s.Is("p") { // process <p> tags
+			hasLiParents := s.ParentsFiltered("li").Size() > 0
+			if !hasLiParents {
+				var text string
+				s.Contents().Each(func(_ int, ps *goquery.Selection) {
+					if ps.Is("a") {
 						urlNo++
-						url := as.AttrOr("href", "")
+						url := ps.AttrOr("href", "")
 						if !strings.HasPrefix(url, "#") { // ignore in-page anchors
 							urls = append(urls, url)
-							aOld := strings.TrimSpace(as.Text())
-							aNew := "[" + aOld + "][" + strconv.Itoa(urlNo) + "]"
-							liText = strings.Replace(liText, aOld, aNew, 1)
+							a := strings.TrimSpace(ps.Text())
+							a = "[" + a + "][" + strconv.Itoa(urlNo) + "]"
+							text += a
 						}
-					})
-					if len(liText) > 0 {
-						if s.Is("ol") {
-							itemNo++
-							liText = strconv.Itoa(itemNo) + ". " + liText
-						} else {
-							liText = "* " + liText
+					} else if ps.Is("code, .code, .inline-code") {
+						code := strings.TrimSpace(ps.Text())
+						if len(code) > 0 {
+							code = "`" + code + "`"
+							text += code
 						}
-					}
-					items = append(items, liText)
-				})
-				itemNo = 0
-				if len(items) > 0 {
-					text := strings.Join(items, "\n")
-					texts = append(texts, text)
-				}
-			} else if s.Is("pre, code") { // process <pre> & <code> tags
-				hasCodeDescendants := s.Find("code").Size() > 0
-				hasPParents := s.ParentsFiltered("p").Size() > 0
-				if (s.Is("pre") && !hasCodeDescendants) || (s.Is("code") && !hasPParents) {
-					code := strings.TrimSpace(s.Text())
-					if len(code) > 0 {
-						text := "```\n" + code + "\n```"
-						texts = append(texts, text)
-					}
-				}
-			} else if s.Is("td") {
-				var text string
-				s.Contents().Each(func(_ int, tds *goquery.Selection) {
-					if goquery.NodeName(tds) == "#text" {
-						text += tds.Text()
-					} else if tds.Is("strong") {
-						text = text + "**" + tds.Text() + "**"
-					} else if tds.Is("em") {
-						text = text + "*" + tds.Text() + "*"
+					} else if ps.Is("strong") {
+						strong := strings.TrimSpace(ps.Text())
+						if len(strong) > 0 {
+							strong = "**" + strong + "**"
+							text += strong
+						}
+					} else if ps.Is("em") {
+						em := strings.TrimSpace(ps.Text())
+						if len(em) > 0 {
+							em = "*" + em + "*"
+							text += em
+						}
+					} else {
+						p := ps.Text()
+						m, n := len(text), len(p)
+						if m > 0 && n > 0 && text[m-1] == '`' && p[0] != ' ' && p[0] != '.' && p[0] != ',' {
+							text += " "
+						}
+						text += p
 					}
 				})
-				check := strings.ReplaceAll(text, "*", "")
-				if len(strings.TrimSpace(check)) > 0 {
-					text = strings.TrimSpace(text)
+				hasBlockQuoteParents := s.ParentsFiltered("blockquote").Size() > 0
+				if hasBlockQuoteParents {
+					text = "> " + text
+				}
+				text = strings.TrimSpace(text)
+				texts = append(texts, text)
+			}
+		} else if s.Is("a") {
+			otherTags := strings.Replace(tags, "a, ", "", 1)
+			hasOtherTagsParents := s.ParentsFiltered(otherTags).Size() > 0
+			if !hasOtherTagsParents {
+				urlNo++
+				url := s.AttrOr("href", "")
+				url = strings.TrimSpace(url)
+				if len(url) > 0 && !strings.HasPrefix(url, "#") { // ignore in-page anchors
+					urls = append(urls, url)
+					var text string
+					hasImgChildren := s.Find("img").Size() > 0
+					if hasImgChildren { // process <img> tags inside a <a> tag
+						// TODO Question: Is it duplicated to process <img> tags inside <a> tags?
+						var title string
+						imgChild := s.Find("img").First()
+						figcaptionChildren := s.SiblingsFiltered("figcaption")
+						if figcaptionChildren.Size() > 0 {
+							title = figcaptionChildren.First().Text()
+							title = strings.TrimSpace(title)
+						}
+						if len(title) == 0 {
+							title = imgChild.AttrOr("alt", "")
+							title = strings.TrimSpace(title)
+						}
+						text = "![" + title + "][" + strconv.Itoa(urlNo) + "]"
+					} else {
+						aText := strings.TrimSpace(s.Text())
+						text = "[" + aText + "][" + strconv.Itoa(urlNo) + "]"
+					}
 					texts = append(texts, text)
 				}
 			}
-		})
+		} else if s.Is("span") {
+			otherTags := strings.Replace(tags, "span, ", "", 1)
+			hasOtherTagsParents := s.ParentsFiltered(otherTags).Size() > 0
+			if !hasOtherTagsParents {
+				text := strings.TrimSpace(s.Text())
+				texts = append(texts, text)
+			}
+		} else if s.Is("amp-img, img") { // process <amp-img> & <img> tags
+			// TODO Question: Why does it not process <img> tags inside <a> tags?
+			hasAmpImgParents := s.ParentsFiltered("amp-img").Size() > 0
+			hidden := s.AttrOr("aria-hidden", "false") == "true"
+			if s.Is("amp-img") || (s.Is("img") && !hidden && !hasAmpImgParents) {
+				urlNo++
+				url := s.AttrOr("src", "")
+				if strings.HasPrefix(url, "data:image") {
+					url = ""
+				}
+				// if src empty, try data-src attribute
+				if url == "" {
+					url = s.AttrOr("data-src", "")
+				}
+				// if data-src empty, try data-lazy-src attribute
+				if url == "" {
+					url = s.AttrOr("data-lazy-src", "")
+				}
+				url = helper.ConcatUrl(baseUrl, url)
+				urls = append(urls, url)
+				var title string
+				// if in <figure>, try and get <figcaption>
+				if s.Parent().Is("figure") {
+					cs := s.Parent().Find("figcaption").First()
+					if cs.Size() > 0 {
+						title = strings.TrimSpace(cs.Text())
+					}
+				}
+				// if no <figcaption>, use title instead
+				if len(title) == 0 {
+					title = s.AttrOr("title", "")
+				}
+				// if missing title, use alt instead
+				if len(title) == 0 {
+					title = s.AttrOr("alt", "")
+				}
+				if len(strings.TrimSpace(title)) > 0 {
+					title = strings.TrimSpace(title)
+				}
+				imgText := "![" + title + "][" + strconv.Itoa(urlNo) + "]"
+				texts = append(texts, imgText)
+			}
+		} else if s.Is("amp-video, video") { // process <amp-video> & HTML5 <video> tags
+			hasAmpVideoParents := s.ParentsFiltered("amp-video").Size() > 0
+			if s.Is("amp-video") || (s.Is("video") && !hasAmpVideoParents) {
+				urlNo++
+				url := s.AttrOr("src", "")
+				source := s.Find("source")
+				if len(url) == 0 && source.Size() > 0 {
+					url = source.First().AttrOr("src", "")
+				}
+				urls = append(urls, url)
+				texts = append(texts, "![]["+strconv.Itoa(urlNo)+"]")
+			}
+		} else if s.Is("iframe") { // process YouTube Embed Videos <iframe> tags
+			urlNo++
+			url := s.AttrOr("src", "")
+			url = strings.Split(url, "?")[0]
+			url = strings.ReplaceAll(url, "www.youtube.com/embed", "youtu.be")
+			urls = append(urls, url)
+			texts = append(texts, "![A Video from YouTube]["+strconv.Itoa(urlNo)+"]")
+		} else if s.Is("ul") || s.Is("ol") { // process <ul> & <ol> tags
+			var items []string
+			itemNo := 0
+			s.Find("li").Each(func(_ int, lis *goquery.Selection) {
+				liText := strings.TrimSpace(lis.Text())
+				// process <a> tags inside each <li> tag
+				lis.Find("a").Each(func(_ int, as *goquery.Selection) {
+					urlNo++
+					url := as.AttrOr("href", "")
+					if !strings.HasPrefix(url, "#") { // ignore in-page anchors
+						urls = append(urls, url)
+						aOld := strings.TrimSpace(as.Text())
+						aNew := "[" + aOld + "][" + strconv.Itoa(urlNo) + "]"
+						liText = strings.Replace(liText, aOld, aNew, 1)
+					}
+				})
+				if len(liText) > 0 {
+					if s.Is("ol") {
+						itemNo++
+						liText = strconv.Itoa(itemNo) + ". " + liText
+					} else {
+						liText = "* " + liText
+					}
+				}
+				items = append(items, liText)
+			})
+			itemNo = 0
+			if len(items) > 0 {
+				text := strings.Join(items, "\n")
+				texts = append(texts, text)
+			}
+		} else if s.Is("pre, code") { // process <pre> & <code> tags
+			hasCodeDescendants := s.Find("code").Size() > 0
+			hasPParents := s.ParentsFiltered("p").Size() > 0
+			if (s.Is("pre") && !hasCodeDescendants) || (s.Is("code") && !hasPParents) {
+				code := strings.TrimSpace(s.Text())
+				if len(code) > 0 {
+					text := "```\n" + code + "\n```"
+					texts = append(texts, text)
+				}
+			}
+		} else if s.Is("td") { // TODO transform HTML tables into Markdown tables
+			var text string
+			s.Contents().Each(func(_ int, tds *goquery.Selection) {
+				if goquery.NodeName(tds) == "#text" {
+					text += tds.Text()
+				} else if tds.Is("strong") {
+					text = text + "**" + tds.Text() + "**"
+				} else if tds.Is("em") {
+					text = text + "*" + tds.Text() + "*"
+				}
+			})
+			check := strings.ReplaceAll(text, "*", "")
+			if len(strings.TrimSpace(check)) > 0 {
+				text = strings.TrimSpace(text)
+				texts = append(texts, text)
+			}
+		}
+	})
 	return texts, urls
 }
