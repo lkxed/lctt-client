@@ -171,31 +171,15 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 			otherTags := strings.Replace(tags, "a, ", "", 1)
 			hasOtherTagsParents := s.ParentsFiltered(otherTags).Size() > 0
 			if !hasOtherTagsParents {
-				urlNo++
 				url := s.AttrOr("href", "")
 				url = strings.TrimSpace(url)
-				if len(url) > 0 && !strings.HasPrefix(url, "#") { // ignore in-page anchors
+				isInPageAnchor := strings.HasPrefix(url, "#")
+				hasImgChildren := s.Find("img").Size() > 0
+				if url != "" && !isInPageAnchor && !hasImgChildren { // ignore in-page anchors
+					urlNo++
 					urls = append(urls, url)
-					var text string
-					hasImgChildren := s.Find("img").Size() > 0
-					if hasImgChildren { // process <img> tags inside a <a> tag
-						// TODO Question: Is it duplicated to process <img> tags inside <a> tags?
-						var title string
-						imgChild := s.Find("img").First()
-						figcaptionChildren := s.SiblingsFiltered("figcaption")
-						if figcaptionChildren.Size() > 0 {
-							title = figcaptionChildren.First().Text()
-							title = strings.TrimSpace(title)
-						}
-						if len(title) == 0 {
-							title = imgChild.AttrOr("alt", "")
-							title = strings.TrimSpace(title)
-						}
-						text = "![" + title + "][" + strconv.Itoa(urlNo) + "]"
-					} else {
-						aText := strings.TrimSpace(s.Text())
-						text = "[" + aText + "][" + strconv.Itoa(urlNo) + "]"
-					}
+					aText := strings.TrimSpace(s.Text())
+					text := "[" + aText + "][" + strconv.Itoa(urlNo) + "]"
 					texts = append(texts, text)
 				}
 			}
@@ -207,44 +191,56 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 				texts = append(texts, text)
 			}
 		} else if s.Is("amp-img, img") { // process <amp-img> & <img> tags
-			// TODO Question: Why does it not process <img> tags inside <a> tags?
 			hasAmpImgParents := s.ParentsFiltered("amp-img").Size() > 0
 			hidden := s.AttrOr("aria-hidden", "false") == "true"
 			if s.Is("amp-img") || (s.Is("img") && !hidden && !hasAmpImgParents) {
 				urlNo++
-				url := s.AttrOr("src", "")
-				if strings.HasPrefix(url, "data:image") {
-					url = ""
-				}
-				// if src empty, try data-src attribute
-				if url == "" {
-					url = s.AttrOr("data-src", "")
-				}
-				// if data-src empty, try data-lazy-src attribute
-				if url == "" {
-					url = s.AttrOr("data-lazy-src", "")
+				var url string
+				var title string
+				// check if it has any <a> parents
+				aParents := s.ParentsFiltered("a")
+				if aParents.Size() > 0 {
+					aParent := aParents.First()
+					url = aParent.AttrOr("href", "")
+					figCaptionSiblings := aParent.SiblingsFiltered("figcaption")
+					if figCaptionSiblings.Size() > 0 {
+						title = figCaptionSiblings.First().Text()
+					}
+				} else {
+					// parse image url
+					url = s.AttrOr("src", "")
+					if strings.HasPrefix(url, "data:image") {
+						url = ""
+					}
+					// if src empty, try data-src attribute
+					if url == "" {
+						url = s.AttrOr("data-src", "")
+					}
+					// if data-src empty, try data-lazy-src attribute
+					if url == "" {
+						url = s.AttrOr("data-lazy-src", "")
+					}
+
+					// parse image title
+					// if in <figure>, try and get <figcaption>
+					if s.Parent().Is("figure") {
+						cs := s.Parent().Find("c").First()
+						if cs.Size() > 0 {
+							title = strings.TrimSpace(cs.Text())
+						}
+					}
+					// if no <figcaption>, use title instead
+					if title == "" {
+						title = s.AttrOr("title", "")
+					}
+					// if missing title, use alt instead
+					if title == "" {
+						title = s.AttrOr("alt", "")
+					}
 				}
 				url = helper.ConcatUrl(baseUrl, url)
 				urls = append(urls, url)
-				var title string
-				// if in <figure>, try and get <figcaption>
-				if s.Parent().Is("figure") {
-					cs := s.Parent().Find("figcaption").First()
-					if cs.Size() > 0 {
-						title = strings.TrimSpace(cs.Text())
-					}
-				}
-				// if no <figcaption>, use title instead
-				if len(title) == 0 {
-					title = s.AttrOr("title", "")
-				}
-				// if missing title, use alt instead
-				if len(title) == 0 {
-					title = s.AttrOr("alt", "")
-				}
-				if len(strings.TrimSpace(title)) > 0 {
-					title = strings.TrimSpace(title)
-				}
+				title = strings.TrimSpace(title)
 				imgText := "![" + title + "][" + strconv.Itoa(urlNo) + "]"
 				texts = append(texts, imgText)
 			}
