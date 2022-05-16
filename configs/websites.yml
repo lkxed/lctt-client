@@ -4,7 +4,7 @@ opensource.com:
   author: .author__list > .profile > a
   date: .author__meta-date
   content: .block-field-blocknodearticlefield-lead-image, .block-field-blocknodearticlebody
-  exclusion: .embedded-callout-menu *
+  exclusion: .embedded-callout-menu *, .embedded-resource-list *
   feed: feed
 
 itsfoss.com:
