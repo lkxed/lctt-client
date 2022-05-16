@@ -34,7 +34,7 @@
   + 提交译文（检测中文占比 -> 提交 PR）
   + 清理分支（PR 列表 -> 已合并 -> 删除对应分支）
 * 开发中：
-  + 同步主仓（由于 [google/go-github][5] 缺少"同步 fork 与 upstream"的 API 实现，我已发起 PR，等待合并）
+  + 同步主仓（我发起的 [google/go-github][5] "同步 fork 与 upstream" PR 已合并，等待 release）
 * 未开启：
   + 自动分类（手动选题、申领原文、提交译文时自动判断文章类别）
 
