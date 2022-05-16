@@ -7,16 +7,25 @@ import (
 	"lctt-client/internal/helper"
 	"log"
 	"strings"
+	"sync"
 )
 
 func ParseAll() []Item {
 	log.Println("Parsing feed...this may take a while...")
 
+	wg := sync.WaitGroup{}
+	wg.Add(len(Links))
+
 	var items []Item
-	for _, link := range Links {
-		items = append(items, parse(link)...)
+	for _, l := range Links {
+		link := l
+		go func() {
+			items = append(items, parse(link)...)
+			wg.Done()
+		}()
 	}
 
+	wg.Wait()
 	log.Println("Completed.")
 	return items
 }
