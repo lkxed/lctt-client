@@ -6,6 +6,7 @@ import (
 )
 
 func ConcatUrl(baseUrl string, url string) string {
+	url = strings.ReplaceAll(url, " ", "%20")
 	if len(url) == 0 || strings.HasPrefix(url, "http") {
 		return url
 	} else if strings.HasPrefix(url, "/") {

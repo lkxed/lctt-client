@@ -125,9 +125,10 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 				var text string
 				s.Contents().Each(func(_ int, ps *goquery.Selection) {
 					if ps.Is("a") && ps.Find("img").Size() == 0 {
-						urlNo++
 						url := ps.AttrOr("href", "")
-						if !strings.HasPrefix(url, "#") { // ignore in-page anchors
+						if url != "" && !strings.HasPrefix(url, "#") { // ignore in-page anchors
+							urlNo++
+							url = helper.ConcatUrl(baseUrl, url)
 							urls = append(urls, url)
 							a := strings.TrimSpace(ps.Text())
 							a = "[" + a + "][" + strconv.Itoa(urlNo) + "]"
@@ -147,6 +148,7 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 								url := aChildren.First().AttrOr("href", "")
 								if url != "" {
 									urlNo++
+									url = helper.ConcatUrl(baseUrl, url)
 									urls = append(urls, url)
 									strong = "[" + strong + "][" + strconv.Itoa(urlNo) + "]"
 								}
@@ -185,6 +187,7 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 			hasImgChildren := s.Find("img").Size() > 0
 			if url != "" && !hasOtherTagsParents && !isInPageAnchor && !hasImgChildren {
 				urlNo++
+				url = helper.ConcatUrl(baseUrl, url)
 				urls = append(urls, url)
 				aText := strings.TrimSpace(s.Text())
 				text := "[" + aText + "][" + strconv.Itoa(urlNo) + "]"
@@ -260,6 +263,7 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 				if len(url) == 0 && source.Size() > 0 {
 					url = source.First().AttrOr("src", "")
 				}
+				url = helper.ConcatUrl(baseUrl, url)
 				urls = append(urls, url)
 				texts = append(texts, "![]["+strconv.Itoa(urlNo)+"]")
 			}
@@ -286,9 +290,10 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 				liText := strings.TrimSpace(lis.Text())
 				// process <a> tags inside each <li> tag
 				lis.Find("a").Each(func(_ int, as *goquery.Selection) {
-					urlNo++
 					url := as.AttrOr("href", "")
 					if !strings.HasPrefix(url, "#") { // ignore in-page anchors
+						urlNo++
+						url = helper.ConcatUrl(baseUrl, url)
 						urls = append(urls, url)
 						aOld := strings.TrimSpace(as.Text())
 						aNew := "[" + aOld + "][" + strconv.Itoa(urlNo) + "]"
