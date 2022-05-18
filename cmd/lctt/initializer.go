@@ -133,8 +133,9 @@ where <CATEGORY> can be "news", "talk" and "tech".`,
 				Action: request,
 			},
 			{
-				Name:  "complete",
-				Usage: "Completes the translating process of an article with its <CATEGORY> and <FILENAME>",
+				Name:                   "complete",
+				UseShortOptionHandling: true,
+				Usage:                  "Completes the translating process of an article with its <CATEGORY> and <FILENAME>",
 				Description: `The "complete" command checks translation, and uploads your translation if the checks passed.
 You need to specify the <CATEGORY> and <FILENAME> of an article,
 where <CATEGORY> can be "news", "talk" and "tech".`,
@@ -149,7 +150,7 @@ where <CATEGORY> can be "news", "talk" and "tech".`,
 						Aliases: []string{"m"},
 						Usage:   "Modifies the translation.",
 					},
-					&cli.StringFlag{
+					&cli.BoolFlag{
 						Name:    "force",
 						Aliases: []string{"f"},
 						Usage:   "Ignores the checks, upload anyway.",

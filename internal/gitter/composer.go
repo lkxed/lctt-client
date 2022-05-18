@@ -171,7 +171,7 @@ func Complete(category string, filename string, force bool) error {
 	}
 	zhHansPercentage := float64(count) * 3 / float64(len(translation))
 	log.Printf("Chinese characters consist %.1f%% of your translation.\n", zhHansPercentage*100)
-	if !force && zhHansPercentage <= 0.75 {
+	if !force && zhHansPercentage <= 0.70 {
 		return errors.New("translation not completed")
 	}
 

@@ -183,6 +183,7 @@ func complete(c *cli.Context) error {
 	log.Println("Completing...")
 
 	filename := c.Args().Get(0)
+
 	if c.Bool("modify") {
 		editor := configurar.Settings.Editor
 		if len(configurar.Settings.Editor) == 0 {
@@ -212,6 +213,7 @@ func complete(c *cli.Context) error {
 	if !helper.StringSliceContains(categories, category) {
 		log.Fatalln("To upload, you must specify the <CATEGORY>.")
 	}
+
 	force := c.Bool("force")
 	err := gitter.Complete(category, filename, force)
 	if err != nil {
