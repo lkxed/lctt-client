@@ -60,6 +60,7 @@ func Parse(link string) Article {
 	return Article{link, title, summary, author, date, texts, urls}
 }
 
+// parseAuthor parses author's name and link.
 func parseAuthor(doc *goquery.Document, selector string, baseUrl string) Author {
 	var author Author
 	authorAnchor := doc.Find(selector).First()
@@ -78,6 +79,7 @@ func parseAuthor(doc *goquery.Document, selector string, baseUrl string) Author 
 	return author
 }
 
+// parseDate parses the publishing date.
 func parseDate(doc *goquery.Document, selector string) string {
 	var date string
 	var datetime string
@@ -105,6 +107,77 @@ func parseDate(doc *goquery.Document, selector string) string {
 	return date
 }
 
+// parseRichContent parses rich contents inside a container, such as <p>.
+// TODO parse the container recursively with all of its descendents.
+func parseRichContent(s *goquery.Selection, baseUrl string, urlNo int, urls []string) (string, int, []string) {
+	var text string
+	s.Contents().Each(func(_ int, ps *goquery.Selection) {
+		if ps.Is("a") && ps.Find("img").Size() == 0 {
+			url := ps.AttrOr("href", "")
+			if url != "" && !strings.HasPrefix(url, "#") { // ignore in-page anchors
+				urlNo++
+				url = helper.ConcatUrl(baseUrl, url)
+				urls = append(urls, url)
+				a := strings.TrimSpace(ps.Text())
+				a = "[" + a + "][" + strconv.Itoa(urlNo) + "]"
+				text += a
+			}
+		} else if ps.Is("code, .code, .inline-code") {
+			code := strings.TrimSpace(ps.Text())
+			if len(code) > 0 {
+				code = "`" + code + "`"
+				text += code
+			}
+		} else if ps.Is("strong") {
+			strong := strings.TrimSpace(ps.Text())
+			if len(strong) > 0 {
+				aChildren := ps.ChildrenFiltered("a")
+				if aChildren.Size() > 0 {
+					url := aChildren.First().AttrOr("href", "")
+					if url != "" {
+						urlNo++
+						url = helper.ConcatUrl(baseUrl, url)
+						urls = append(urls, url)
+						strong = "[" + strong + "][" + strconv.Itoa(urlNo) + "]"
+					}
+				}
+				strong = "**" + strong + "**"
+				text += strong
+			}
+		} else if ps.Is("em") {
+			em := strings.TrimSpace(ps.Text())
+			if len(em) > 0 {
+				aChildren := ps.ChildrenFiltered("a")
+				if aChildren.Size() > 0 {
+					url := aChildren.First().AttrOr("href", "")
+					if url != "" {
+						urlNo++
+						url = helper.ConcatUrl(baseUrl, url)
+						urls = append(urls, url)
+						em = "[" + em + "][" + strconv.Itoa(urlNo) + "]"
+					}
+				}
+				em = "*" + em + "*"
+				text += em
+			}
+		} else {
+			p := ps.Text()
+			m, n := len(text), len(p)
+			if m > 0 && n > 0 && text[m-1] == '`' && p[0] != ' ' && p[0] != '.' && p[0] != ',' {
+				text += " "
+			}
+			text += p
+		}
+	})
+	hasBlockQuoteParents := s.ParentsFiltered("blockquote").Size() > 0
+	if hasBlockQuoteParents {
+		text = "> " + text
+	}
+	text = strings.TrimSpace(text)
+	return text, urlNo, urls
+}
+
+// parseTexts parses the main content.
 func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUrl string) ([]string, []string) {
 	var texts []string
 	var urls []string
@@ -123,69 +196,7 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 			hasLiParents := s.ParentsFiltered("li").Size() > 0
 			if !hasLiParents {
 				var text string
-				s.Contents().Each(func(_ int, ps *goquery.Selection) {
-					if ps.Is("a") && ps.Find("img").Size() == 0 {
-						url := ps.AttrOr("href", "")
-						if url != "" && !strings.HasPrefix(url, "#") { // ignore in-page anchors
-							urlNo++
-							url = helper.ConcatUrl(baseUrl, url)
-							urls = append(urls, url)
-							a := strings.TrimSpace(ps.Text())
-							a = "[" + a + "][" + strconv.Itoa(urlNo) + "]"
-							text += a
-						}
-					} else if ps.Is("code, .code, .inline-code") {
-						code := strings.TrimSpace(ps.Text())
-						if len(code) > 0 {
-							code = "`" + code + "`"
-							text += code
-						}
-					} else if ps.Is("strong") {
-						strong := strings.TrimSpace(ps.Text())
-						if len(strong) > 0 {
-							aChildren := ps.ChildrenFiltered("a")
-							if aChildren.Size() > 0 {
-								url := aChildren.First().AttrOr("href", "")
-								if url != "" {
-									urlNo++
-									url = helper.ConcatUrl(baseUrl, url)
-									urls = append(urls, url)
-									strong = "[" + strong + "][" + strconv.Itoa(urlNo) + "]"
-								}
-							}
-							strong = "**" + strong + "**"
-							text += strong
-						}
-					} else if ps.Is("em") {
-						em := strings.TrimSpace(ps.Text())
-						if len(em) > 0 {
-							aChildren := ps.ChildrenFiltered("a")
-							if aChildren.Size() > 0 {
-								url := aChildren.First().AttrOr("href", "")
-								if url != "" {
-									urlNo++
-									url = helper.ConcatUrl(baseUrl, url)
-									urls = append(urls, url)
-									em = "[" + em + "][" + strconv.Itoa(urlNo) + "]"
-								}
-							}
-							em = "*" + em + "*"
-							text += em
-						}
-					} else {
-						p := ps.Text()
-						m, n := len(text), len(p)
-						if m > 0 && n > 0 && text[m-1] == '`' && p[0] != ' ' && p[0] != '.' && p[0] != ',' {
-							text += " "
-						}
-						text += p
-					}
-				})
-				hasBlockQuoteParents := s.ParentsFiltered("blockquote").Size() > 0
-				if hasBlockQuoteParents {
-					text = "> " + text
-				}
-				text = strings.TrimSpace(text)
+				text, urlNo, urls = parseRichContent(s, baseUrl, urlNo, urls)
 				texts = append(texts, text)
 			}
 		} else if s.Is("a") {
@@ -310,6 +321,14 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 						liText = strings.Replace(liText, aOld, aNew, 1)
 					}
 				})
+				lis.Find("code").Each(func(_ int, codes *goquery.Selection) {
+					code := strings.TrimSpace(codes.Text())
+					if len(code) > 0 {
+						codeOld := " " + code
+						codeNew := " `" + code + "`"
+						liText = strings.Replace(liText, codeOld, codeNew, 1)
+					}
+				})
 				if len(liText) > 0 {
 					if s.Is("ol") {
 						itemNo++
@@ -327,8 +346,8 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 			}
 		} else if s.Is("pre, code") { // process <pre> & <code> tags
 			hasCodeDescendants := s.Find("code").Size() > 0
-			hasPParents := s.ParentsFiltered("p").Size() > 0
-			if (s.Is("pre") && !hasCodeDescendants) || (s.Is("code") && !hasPParents) {
+			hasPOrLiParents := s.ParentsFiltered("p, li").Size() > 0
+			if (s.Is("pre") && !hasCodeDescendants) || (s.Is("code") && !hasPOrLiParents) {
 				code := strings.TrimSpace(s.Text())
 				if len(code) > 0 {
 					text := "```\n" + code + "\n```"
