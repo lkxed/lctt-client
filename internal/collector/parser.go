@@ -237,37 +237,38 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 					if figCaptionSiblings.Size() > 0 {
 						title = figCaptionSiblings.First().Text()
 					}
-				} else {
-					// parse image url
+				}
+				// parse image url
+				if url == "" {
 					url = s.AttrOr("src", "")
-					if strings.HasPrefix(url, "data:image") {
-						url = ""
-					}
-					// if src empty, try data-src attribute
-					if url == "" {
-						url = s.AttrOr("data-src", "")
-					}
-					// if data-src empty, try data-lazy-src attribute
-					if url == "" {
-						url = s.AttrOr("data-lazy-src", "")
-					}
+				}
+				if strings.HasPrefix(url, "data:image") {
+					url = ""
+				}
+				// if src empty, try data-src attribute
+				if url == "" {
+					url = s.AttrOr("data-src", "")
+				}
+				// if data-src empty, try data-lazy-src attribute
+				if url == "" {
+					url = s.AttrOr("data-lazy-src", "")
+				}
 
-					// parse image title
-					// if in <figure>, try and get <figcaption>
-					if s.Parent().Is("figure") {
-						cs := s.Parent().Find("c").First()
-						if cs.Size() > 0 {
-							title = strings.TrimSpace(cs.Text())
-						}
+				// parse image title
+				// if in <figure>, try and get <figcaption>
+				if title == "" && s.Parent().Is("figure") {
+					cs := s.Parent().Find("c").First()
+					if cs.Size() > 0 {
+						title = strings.TrimSpace(cs.Text())
 					}
-					// if no <figcaption>, use title instead
-					if title == "" {
-						title = s.AttrOr("title", "")
-					}
-					// if missing title, use alt instead
-					if title == "" {
-						title = s.AttrOr("alt", "")
-					}
+				}
+				// if no <figcaption>, use title instead
+				if title == "" {
+					title = s.AttrOr("title", "")
+				}
+				// if missing title, use alt instead
+				if title == "" {
+					title = s.AttrOr("alt", "")
 				}
 				url = helper.ConcatUrl(baseUrl, url)
 				urls = append(urls, url)
