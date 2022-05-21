@@ -50,7 +50,7 @@ jvns.ca:
   date: .meta > time
   content: .entry-content
   exclusion:
-  feed:
+  feed: atom.xml
 
 kerneltalks.com:
   title: .entry-title
