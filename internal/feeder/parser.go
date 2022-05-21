@@ -7,6 +7,7 @@ import (
 	"lctt-client/internal/helper"
 	"log"
 	"strings"
+	"time"
 )
 
 func ParseAll() []Item {
@@ -23,8 +24,13 @@ func ParseAll() []Item {
 		}()
 	}
 
-	for i := 0; i < len(Links); i++ {
-		_ = <-c
+	for _, l := range Links {
+		select {
+		case <-c:
+			continue
+		case <-time.After(3 * time.Second):
+			log.Printf("Timeout: %s.\n", l)
+		}
 	}
 
 	log.Println("Completed.")
