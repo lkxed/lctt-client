@@ -182,7 +182,7 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 	var texts []string
 	var urls []string
 	var urlNo int
-	tags := "h2, h3, h4, p, a, span, amp-img, img, amp-video, video, iframe, ul, ol, code, pre, td"
+	tags := "h2, h3, h4, p, a, span, amp-img, img, amp-video, video, iframe, ul, ol, code, pre, table"
 	selection := doc.Find(selector).Find(tags).Not(exclusion)
 	// TODO process <code> inside <li>, I forgot the problem...will deal with it when it occurs again
 	selection.Each(func(elementIndex int, s *goquery.Selection) {
@@ -347,27 +347,46 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 			}
 		} else if s.Is("pre, code") { // process <pre> & <code> tags
 			hasCodeDescendants := s.Find("code").Size() > 0
-			hasPOrLiParents := s.ParentsFiltered("p, li").Size() > 0
-			if (s.Is("pre") && !hasCodeDescendants) || (s.Is("code") && !hasPOrLiParents) {
+			hasPLiTdParents := s.ParentsFiltered("p, li, td").Size() > 0
+			if !hasPLiTdParents && ((s.Is("pre") && !hasCodeDescendants) || s.Is("code")) {
 				code := strings.TrimSpace(s.Text())
 				if len(code) > 0 {
 					text := "```\n" + code + "\n```"
 					texts = append(texts, text)
 				}
 			}
-		} else if s.Is("td") { // TODO transform HTML tables into Markdown tables
+		} else if s.Is("table") { // TODO transform HTML tables into Markdown tables
 			var text string
-			s.Contents().Each(func(_ int, tds *goquery.Selection) {
-				if goquery.NodeName(tds) == "#text" {
-					text += tds.Text()
-				} else if tds.Is("strong") {
-					text = text + "**" + tds.Text() + "**"
-				} else if tds.Is("em") {
-					text = text + "*" + tds.Text() + "*"
+			trElements := s.Find("tr")
+			if trElements.Size() > 0 {
+				var columnCount int
+				var rows []string
+				// table row
+				trElements.Each(func(_ int, trs *goquery.Selection) {
+					tdElements := trs.Find("td")
+					columnCount = tdElements.Size()
+					row := "| "
+					tdElements.Each(func(_ int, tds *goquery.Selection) {
+						td := strings.TrimSpace(tds.Text())
+						row += td
+						row += " | "
+					})
+					rows = append(rows, row)
+				})
+				for i := 0; i < columnCount; i++ {
+					text += "| - "
 				}
-			})
-			check := strings.ReplaceAll(text, "*", "")
-			if len(strings.TrimSpace(check)) > 0 {
+				text += "|"
+				text += "\n"
+				for i := 0; i < columnCount; i++ {
+					text += "| :- "
+				}
+				text += "|"
+				text += "\n"
+				for _, row := range rows {
+					text += row
+					text += "\n"
+				}
 				text = strings.TrimSpace(text)
 				texts = append(texts, text)
 			}
