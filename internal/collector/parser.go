@@ -310,6 +310,8 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 			itemNo := 0
 			s.Find("li").Each(func(_ int, lis *goquery.Selection) {
 				liText := strings.TrimSpace(lis.Text())
+				liText = strings.ReplaceAll(liText, "\n\n", "\n")
+				liText = strings.ReplaceAll(liText, "\n\n", "\n")
 				// process <a> tags inside each <li> tag
 				lis.Find("a").Each(func(_ int, as *goquery.Selection) {
 					url := as.AttrOr("href", "")
@@ -331,17 +333,28 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 					}
 				})
 				if len(liText) > 0 {
+					rawLiText := liText
 					if s.Is("ol") {
 						itemNo++
 						liText = strconv.Itoa(itemNo) + ". " + liText
 					} else {
 						liText = "* " + liText
 					}
+					if len(items) > 0 && lis.Is("li li li") {
+						prev := items[len(items)-1]
+						prev = strings.Replace(prev, rawLiText, "    "+liText, 1)
+						items[len(items)-1] = prev
+					} else if len(items) > 0 && lis.Is("li li") {
+						prev := items[len(items)-1]
+						prev = strings.Replace(prev, rawLiText, "  "+liText, 1)
+						items[len(items)-1] = prev
+					} else {
+						items = append(items, liText)
+					}
 				}
-				items = append(items, liText)
 			})
 			itemNo = 0
-			if len(items) > 0 {
+			if len(items) > 0 && s.ParentsFiltered("ol, ul").Size() == 0 {
 				text := strings.Join(items, "\n")
 				texts = append(texts, text)
 			}
@@ -355,7 +368,7 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 					texts = append(texts, text)
 				}
 			}
-		} else if s.Is("table") { // TODO transform HTML tables into Markdown tables
+		} else if s.Is("table") {
 			var text string
 			trElements := s.Find("tr")
 			if trElements.Size() > 0 {
