@@ -361,28 +361,51 @@ func parseTexts(doc *goquery.Document, selector string, exclusion string, baseUr
 			if trElements.Size() > 0 {
 				var columnCount int
 				var rows []string
-				// table row
+				var head string
+
+				// table head
+				tdElements := s.Find("thead > tr > th")
+				if tdElements.Size() > 0 {
+					head = "| "
+					tdElements.Each(func(_ int, ths *goquery.Selection) {
+						head += strings.TrimSpace(ths.Text())
+						head += " | "
+					})
+				}
+
+				// table rows
 				trElements.Each(func(_ int, trs *goquery.Selection) {
 					tdElements := trs.Find("td")
 					columnCount = tdElements.Size()
-					row := "| "
-					tdElements.Each(func(_ int, tds *goquery.Selection) {
-						td := strings.TrimSpace(tds.Text())
-						row += td
-						row += " | "
-					})
-					rows = append(rows, row)
+					if tdElements.Size() > 0 {
+						row := "| "
+						tdElements.Each(func(_ int, tds *goquery.Selection) {
+							row += strings.TrimSpace(tds.Text())
+							row += " | "
+						})
+						rows = append(rows, row)
+					}
 				})
-				for i := 0; i < columnCount; i++ {
-					text += "| - "
+
+				// concat table head
+				if head != "" {
+					text += head
+				} else {
+					for i := 0; i < columnCount; i++ {
+						text += "| - "
+					}
+					text += "|"
 				}
-				text += "|"
 				text += "\n"
+
+				// concat table alignment
 				for i := 0; i < columnCount; i++ {
 					text += "| :- "
 				}
 				text += "|"
 				text += "\n"
+
+				// concat table rows
 				for _, row := range rows {
 					text += row
 					text += "\n"
