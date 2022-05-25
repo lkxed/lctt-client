@@ -152,8 +152,8 @@ func list(c *cli.Context) error {
 
 	category := c.String("category")
 	categories := []string{"news", "talk", "tech"}
-	if !helper.StringSliceContains(categories, category) {
-		log.Fatalln("To upload, you must specify the <CATEGORY>.")
+	if category != "" && !helper.StringSliceContains(categories, category) {
+		log.Fatalln("<CATEGORY> must be `news`, `talk` or `tech`.")
 	}
 	filenames := gitter.List(category)
 	if len(filenames) == 0 {

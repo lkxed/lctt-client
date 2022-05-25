@@ -24,12 +24,14 @@ func ParseAll() []Item {
 		}()
 	}
 
-	for _, l := range Links {
+	duration := 3 * time.Second
+	timeout := time.NewTimer(duration)
+	for range Links {
+		timeout.Reset(duration)
 		select {
 		case <-c:
-			continue
-		case <-time.After(3 * time.Second):
-			log.Printf("Timeout: %s.\n", l)
+		case <-timeout.C:
+			log.Println("Timeout.")
 		}
 	}
 

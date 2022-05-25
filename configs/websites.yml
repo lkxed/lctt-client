@@ -22,7 +22,7 @@ news.itsfoss.com:
   author: .entry-subhead > .entry-meta > .byline > .author > a
   date: .posted-on > .entry-date
   content: .post-thumbnail, .entry-content
-  exclusion: .jp-relatedposts-i2 *, amp-youtube a
+  exclusion: .jp-relatedposts-i2 *, amp-youtube a, aside + p
   feed: feed
 
 www.debugpoint.com:
