@@ -6,9 +6,7 @@ import (
 	"lctt-client/internal/helper"
 	"log"
 	"path"
-	"regexp"
 	"strings"
-	"unicode"
 )
 
 // ReplaceUrls replaces original urls with linux.cn urls.
@@ -68,6 +66,7 @@ func Collect(category string, filename string) {
 	log.Printf("Collected: %s.\n", relativePath)
 }
 
+// List sources (of a certain category).
 func List(category string) []string {
 	contentPath := path.Join("sources", category)
 	filenames, err := getDirFilenames(contentPath)
@@ -148,32 +147,13 @@ func Complete(category string, filename string, force bool) error {
 	branch := initBranch(filename)
 	checkout(branch)
 
-	// Process file: Decide whether the translation is complete by
-	// checking if Chinese bytes consist more than 75% of it.
-	// This is a rough estimation, better algorithms needed.
-	content := string(helper.ReadFile(tmpPath))
-	rest := strings.Split(content, "======")[1]
-	// extract main content
-	translation := strings.Split(rest,
-		"--------------------------------------------------------------------------------")[0]
-	// exclude code blocks
-	re := regexp.MustCompile("```[\\w|\\W]*```")
-	translation = string(re.ReplaceAll([]byte(translation), []byte{}))
-	// exclude spaces
-	translation = strings.ReplaceAll(translation, " ", "")
-	translation = strings.ReplaceAll(translation, "\n", "")
-	translation = strings.ReplaceAll(translation, "\t", "")
-	var count int
-	for _, c := range translation {
-		if unicode.Is(unicode.Han, c) {
-			count++
-		}
-	}
-	zhHansPercentage := float64(count) * 3 / float64(len(translation))
+	zhHansPercentage := helper.ArticleZhHansPercentage(tmpPath)
 	log.Printf("Chinese characters consist %.1f%% of your translation.\n", zhHansPercentage*100)
 	if !force && zhHansPercentage <= 0.70 {
 		return errors.New("translation not completed")
 	}
+
+	content := string(helper.ReadFile(tmpPath))
 
 	// In case somebody forgets to change it
 	if strings.Contains(content, "译者ID") {
@@ -244,7 +224,9 @@ func Clean() error {
 	}
 	for _, filename := range filenames {
 		isPROpen := helper.StringSliceContains(titles, filename)
-		if !isPROpen {
+		filepath := path.Join(helper.TmpDir, filename)
+		isBeingTranslated := helper.IsBeingTranslated(filepath)
+		if !isPROpen && !isBeingTranslated {
 			cleanBranch(filename)
 			// Remove temporary files
 			tmpPath := path.Join(helper.TmpDir, filename)
