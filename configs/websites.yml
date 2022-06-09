@@ -13,7 +13,7 @@ itsfoss.com:
   author: .entry-author-link
   date: .entry-modified-time
   content: .entry-content
-  exclusion: .ss-inline-share-wrapper *
+  exclusion: .ss-inline-share-wrapper *, .gb-block-profile *
   feed: feed
 
 news.itsfoss.com:
