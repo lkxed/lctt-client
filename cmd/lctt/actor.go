@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/urfave/cli/v2"
 	"lctt-client/internal/collector"
 	"lctt-client/internal/configurar"
 	"lctt-client/internal/feeder"
@@ -13,6 +12,8 @@ import (
 	"path"
 	"strings"
 	"time"
+
+	"github.com/urfave/cli/v2"
 )
 
 func initialize(_ *cli.Context) error {
@@ -97,7 +98,7 @@ func collect(c *cli.Context) error {
 			log.Fatalln("To upload, you must specify the <CATEGORY>.")
 		}
 		confirmation := "yes"
-		for true {
+		for {
 			fmt.Print("Are you ready to upload the article? (yes/no) (default: yes): ")
 			_, _ = fmt.Scanln(&confirmation)
 			confirmation = strings.TrimSpace(confirmation)
@@ -155,7 +156,23 @@ func list(c *cli.Context) error {
 	if category != "" && !helper.StringSliceContains(categories, category) {
 		log.Fatalln("<CATEGORY> must be `news`, `talk` or `tech`.")
 	}
-	filenames := gitter.List(category)
+
+	var since *time.Time
+	dateStr := c.String("since")
+	if dateStr != "" {
+		date, err := time.Parse(layout, dateStr)
+		if err != nil {
+			since = nil
+		} else {
+			since = &date
+		}
+	} else {
+		since = nil
+	}
+
+	all := c.Bool("all")
+
+	filenames := gitter.List(category, since, all)
 	if len(filenames) == 0 {
 		return nil
 	}
@@ -197,7 +214,7 @@ func complete(c *cli.Context) error {
 		helper.ExitIfError(cmd.Run())
 
 		confirmation := "yes"
-		for true {
+		for {
 			fmt.Print("Are you ready to upload the article? (yes/no) (default: yes): ")
 			_, _ = fmt.Scanln(&confirmation)
 			confirmation = strings.TrimSpace(confirmation)

@@ -7,6 +7,7 @@ import (
 	"log"
 	"path"
 	"strings"
+	"time"
 )
 
 // ReplaceUrls replaces original urls with linux.cn urls.
@@ -67,9 +68,32 @@ func Collect(category string, filename string) {
 }
 
 // List sources (of a certain category).
-func List(category string) []string {
+func List(category string, since *time.Time, all bool) []string {
 	contentPath := path.Join("sources", category)
-	filenames, err := getDirFilenames(contentPath)
+
+	var nameFilter func(s string) bool
+	if since == nil {
+		nameFilter = nil
+	} else {
+		nameFilter = func(s string) bool {
+			date, err := time.Parse("20060102", s[:8])
+			if err != nil {
+				return false
+			}
+			return date.After(*since)
+		}
+	}
+
+	var contentFilter func(s string) bool
+	if all {
+		contentFilter = nil
+	} else {
+		contentFilter = func(s string) bool {
+			return strings.Contains(s, `translator: " "`) || strings.Contains(s, `translator: ( )`)
+		}
+	}
+	
+	filenames, err := getDirFilenames(contentPath, nameFilter, contentFilter)
 	if err != nil {
 		return nil
 	}

@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/urfave/cli/v2"
 	"time"
+
+	"github.com/urfave/cli/v2"
 )
 
 var (
@@ -107,6 +108,16 @@ where <CATEGORY> can be "news", "talk" and "tech" and <LINK> belongs to a websit
 						Name:    "category",
 						Aliases: []string{"c"},
 						Usage:   "Specifies the `<CATEGORY>` of articles you are interested in.",
+					},
+					&cli.StringFlag{
+						Name:    "since",
+						Aliases: []string{"s"},
+						Usage:   "Specifies the `<DATE>` after which articles are published.",
+					},
+					&cli.BoolFlag{
+						Name:    "available",
+						Aliases: []string{"a"},
+						Usage:   "Only list those which are available to translate.",
 					},
 				},
 				Action: list,

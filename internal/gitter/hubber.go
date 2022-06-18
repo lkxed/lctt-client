@@ -2,27 +2,57 @@ package gitter
 
 import (
 	"context"
-	"github.com/google/go-github/v43/github"
+	"encoding/base64"
 	"lctt-client/internal/helper"
 	"log"
 	"path"
 	"strings"
+
+	"github.com/google/go-github/v43/github"
 )
 
-func getDirFilenames(contentPath string) ([]string, error) {
-	log.Printf("Getting direcotry filenames with path `%s`...", contentPath)
+func getDirFilenames(dirPath string, nameFilter func(string) bool, contentFilter func(string) bool) ([]string, error) {
+	log.Printf("Getting direcotry filenames with path `%s`...", dirPath)
 
 	owner := UpstreamOwner
 	repo := path.Base(UpstreamRepository)
-	_, directoryContent, _, err := client.Repositories.GetContents(context.Background(), owner, repo, contentPath, nil)
+	_, directoryContent, _, err := client.Repositories.GetContents(context.Background(), owner, repo, dirPath, nil)
 	if err != nil {
 		return nil, err
 	}
 	var filenames []string
 	for _, content := range directoryContent {
-		filenames = append(filenames, *content.Name)
+		filename := *content.Name
+		if nameFilter != nil && !nameFilter(filename) {
+			continue
+		}
+		if contentFilter != nil {
+			fileContent, err := getFileContent(path.Join(dirPath, filename))
+			if err != nil {
+				continue
+			}
+			if !contentFilter(fileContent) {
+				continue
+			}
+		}
+		filenames = append(filenames, filename)
 	}
 	return filenames, nil
+}
+
+func getFileContent(filepath string) (string, error) {
+	owner := UpstreamOwner
+	repo := path.Base(UpstreamRepository)
+	fileContent, _, _, err := client.Repositories.GetContents(context.Background(), owner, repo, filepath, nil)
+	if err != nil {
+		return "", err
+	}
+	bytes, err := base64.StdEncoding.DecodeString(*fileContent.Content)
+	if err != nil {
+		return "", err
+	}
+	content := string(bytes)
+	return content, nil
 }
 
 func fork() *github.Repository {

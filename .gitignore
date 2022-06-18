@@ -35,3 +35,4 @@ bin/
 
 # Personal configuations
 configs/settings.yml
+.vscode/launch.json
