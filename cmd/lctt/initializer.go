@@ -115,7 +115,7 @@ where <CATEGORY> can be "news", "talk" and "tech" and <LINK> belongs to a websit
 						Usage:   "Specifies the `<DATE>` after which articles are published.",
 					},
 					&cli.BoolFlag{
-						Name:    "available",
+						Name:    "all",
 						Aliases: []string{"a"},
 						Usage:   "Only list those which are available to translate.",
 					},
