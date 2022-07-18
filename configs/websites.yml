@@ -10,8 +10,8 @@ opensource.com:
 itsfoss.com:
   title: .entry-title
   summary: .entry-content > p:first-child
-  author: .entry-author-link
-  date: .entry-modified-time
+  author: .posted-by > .author > a
+  date: span.updated-on > time
   content: .entry-content
   exclusion: .ss-inline-share-wrapper *, .gb-block-profile *
   feed: feed
@@ -82,8 +82,8 @@ www.linux.com:
 www.linuxtechi.com:
   title: .entry-title
   summary:
-  author: .author-name > a
-  date: .posted-on > .updated
+  author: .byline > .author > a
+  date: span.posted-on > time
   content: .entry-content
   exclusion:
   feed: feed
