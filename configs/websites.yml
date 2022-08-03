@@ -62,12 +62,12 @@ kerneltalks.com:
   feed: feed
 
 www.opensourceforu.com:
-  title: .td-post-title > .entry-title
-  summary: .td-post-content > p > em
-  author: .td-post-author-name > a
-  date: .td-post-date > .entry-date
-  content: .td-post-content
-  exclusion: .td-a-rec *
+  title: .tdb-title-text
+  summary: 
+  author: .tdb-author-name-wrap > a
+  date: .tdb-block-inner > .entry-date
+  content: .tdb_single_content > .tdb-block-inner
+  exclusion: .td-adspot-title
   feed: feed
 
 www.linux.com:
