@@ -17,12 +17,12 @@ itsfoss.com:
   feed: feed
 
 news.itsfoss.com:
-  title: .entry-title
-  summary: .newspack-post-subtitle
-  author: .entry-subhead > .entry-meta > .byline > .author > a
-  date: .posted-on > .entry-date
-  content: .post-thumbnail, .entry-content
-  exclusion: .jp-relatedposts-i2 *, amp-youtube a, aside
+  title: .gh-article-title
+  summary: .gh-article-excerpt
+  author: .gh-author-name > a
+  date: .gh-article-date
+  content: .gh-article-image, .gh-content
+  exclusion: 
   feed: feed
 
 www.debugpoint.com:
